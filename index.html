@@ -415,7 +415,8 @@ function parseResponse(text) {
       /* 배열 형태 */
       if (Array.isArray(json)) return json;
 
-      /* { res: [...] } 또는 { list: [...] } 등 다양한 형태 */
+      /* dooinauction.com: { item: [...], totalCnt: N } */
+      if (json.item   && Array.isArray(json.item))   return json.item;
       if (json.res    && Array.isArray(json.res))    return json.res;
       if (json.list   && Array.isArray(json.list))   return json.list;
       if (json.data   && Array.isArray(json.data))   return json.data;
@@ -472,20 +473,21 @@ function loadMore() {
    카드 생성
 ═══════════════════════════════ */
 function buildCard(item, idx) {
-  /* 필드 추출 (dooinauction.com 응답 키 이름 대응) */
-  const caseNo   = v(item, ['caseNo','case_no','CaseNo','saleNo','CASE_NO']) || '';
-  const type     = v(item, ['ctgrNm','ctgr_nm','type','kindNm','KIND_NM','물건종류']) || '';
-  const addr     = v(item, ['addr','address','addrNm','ADDR','lclsNm','sojaJi','소재지']) || '주소 정보 없음';
-  const apslAmt  = num(v(item, ['apslAmt','apsl_amt','감정가','APSL_AMT']));
-  const minbAmt  = num(v(item, ['minbAmt','minb_amt','최저가','lowAmt','LOW_AMT','MINB_AMT']));
-  const bidDt    = v(item, ['bidDt','bid_dt','saleDt','SALE_DT','매각기일']) || '';
-  const bidTm    = v(item, ['bidTm','bid_tm','saleTm','SALE_TM','BIDTM','입찰시간']) || '';
-  const stat     = v(item, ['statNm','stat_nm','진행상태','STATUS_NM','status']) || '';
-  const caseYear = v(item, ['caseYear','caseYr','CASE_YEAR']) || '';
-  const caseSeq  = v(item, ['caseSeq','CASE_SEQ','caseIdx']) || '';
+  /* 필드 추출 - dooinauction.com 실제 응답 키 */
+  const caseNo  = (item.saNo   || '').replace(/<[^>]*>/g, '').trim();
+  const type    = item.ctgr    || '';
+  const addr    = item.adrsInfo|| item.regnAdrs || '주소 정보 없음';
+  const apslAmt = num(item.apslAmt);
+  const minbAmt = num(item.minbAmt);
+  const bidDt   = item.bidDt   || '';
+  const bidTm   = item.bidTm   || '';
+  const stat    = (item.statNm || '').replace(/<[^>]*>/g, '').trim();
+  const tid     = item.tid     || '';
 
   /* 두인경매 상세 페이지 링크 */
-  const detailLink = buildDetailLink(caseNo, caseYear, caseSeq, item);
+  const detailLink = tid
+    ? `https://www.dooinauction.com/ca/caDtView.php?tid=${tid}`
+    : buildDetailLink(caseNo, '', '', item);
 
   /* 상태 배지 색 */
   let statClass = 'status-기타';
@@ -561,15 +563,17 @@ function num(val) {
 }
 
 function fmtAmt(n) {
-  if (!n) return '-';
+  if (!n || n === 0) return '-';
   if (n >= 100000000) {
     const eok = Math.floor(n / 100000000);
     const man = Math.floor((n % 100000000) / 10000);
     return man ? eok + '억 ' + man.toLocaleString() + '만' : eok + '억';
   }
-  if (n >= 10000) return Math.floor(n/10000).toLocaleString() + '만';
+  if (n >= 10000) return Math.floor(n / 10000).toLocaleString() + '만';
   return n.toLocaleString() + '원';
 }
+
+/* 금액 문자열 → 숫자 ("142,000,000" → 142000000) */
 
 function esc(s) {
   return String(s || '')
