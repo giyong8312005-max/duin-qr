@@ -5,344 +5,579 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>두인경매 - 오늘의 경매물건</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --red:    #e8310b;
+      --gold:   #e8c56b;
+      --bg:     #0d1b2a;
+      --card:   #1a2e45;
+      --border: rgba(255,255,255,0.08);
+      --text:   #f1f5f9;
+      --sub:    #94a3b8;
+      --dim:    #334155;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
                    'Noto Sans KR', '맑은 고딕', sans-serif;
-      background: #0d1b2a;
-      color: #fff;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+    }
+
+    /* ── 헤더 ── */
+    .top-bar {
+      background: #0a1520;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo-box {
+      width: 32px; height: 32px;
+      background: var(--red);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 900; color: #fff; flex-shrink: 0;
+    }
+
+    .top-bar-info { flex: 1; min-width: 0; }
+    .top-bar-name {
+      font-size: 15px; font-weight: 800;
+      color: var(--gold);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .top-bar-date { font-size: 11px; color: var(--sub); margin-top: 1px; }
+
+    .top-bar-link {
+      font-size: 11px; color: var(--sub);
+      text-decoration: none;
+      border: 1px solid var(--dim);
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .top-bar-link:hover { border-color: var(--sub); color: var(--text); }
+
+    /* ── 로딩 ── */
+    #loadingView {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      min-height: calc(100vh - 57px);
+      gap: 16px;
       padding: 24px;
     }
 
-    .card {
-      background: #1a2e45;
-      border-radius: 20px;
-      padding: 36px 28px;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.07);
-    }
-
-    .logo-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 28px;
-    }
-
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: #e8310b;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .logo-text {
-      font-size: 18px;
-      font-weight: 700;
-      color: #e8c56b;
-      letter-spacing: -0.3px;
-    }
-
-    .date-badge {
-      display: inline-block;
-      background: rgba(232, 49, 11, 0.18);
-      border: 1px solid rgba(232, 49, 11, 0.4);
-      color: #f87171;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 5px 14px;
-      border-radius: 999px;
-      margin-bottom: 20px;
-      letter-spacing: 0.4px;
-    }
-
-    .court-name {
-      font-size: 28px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.2;
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
-    }
-
-    .court-sub {
-      font-size: 15px;
-      color: #94a3b8;
-      margin-bottom: 32px;
-    }
-
-    .spinner-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
     .spinner {
-      width: 44px;
-      height: 44px;
+      width: 40px; height: 40px;
       border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: #e8c56b;
+      border-top-color: var(--gold);
       border-radius: 50%;
       animation: spin 0.9s linear infinite;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .loading-text {
-      font-size: 14px;
-      color: #64748b;
+    .loading-text { font-size: 14px; color: var(--sub); }
+
+    /* ── 통계 바 ── */
+    #statsBar {
+      display: none;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--sub);
     }
 
-    .countdown {
-      font-size: 22px;
-      font-weight: 700;
-      color: #e8c56b;
-      line-height: 1;
-    }
+    #statsBar strong { color: var(--gold); font-size: 16px; }
 
-    .btn-main {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      background: #e8310b;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
+    /* ── 목록 ── */
+    #listView { display: none; padding: 12px 12px 40px; }
+
+    .auction-item {
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s;
-      letter-spacing: -0.3px;
-    }
-
-    .btn-main:hover { background: #c5290a; }
-
-    .footer-note {
-      margin-top: 20px;
-      font-size: 11px;
-      color: #334155;
-      line-height: 1.6;
-    }
-
-    /* 에러 상태 */
-    .error-card { display: none; }
-    .error-card.show { display: block; }
-
-    .error-icon { font-size: 48px; margin-bottom: 12px; }
-    .error-title { font-size: 18px; font-weight: 700; color: #f87171; margin-bottom: 8px; }
-    .error-desc { font-size: 13px; color: #94a3b8; line-height: 1.6; }
-
-    .btn-secondary {
-      display: block;
-      width: 100%;
       padding: 14px;
-      background: transparent;
-      color: #94a3b8;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 12px;
+      margin-bottom: 10px;
       text-decoration: none;
-      transition: border-color 0.2s, color 0.2s;
+      display: block;
+      transition: border-color 0.2s;
+    }
+    .auction-item:active { border-color: var(--gold); }
+
+    .item-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .btn-secondary:hover { border-color: #94a3b8; color: #fff; }
+    .type-badge {
+      background: rgba(232,49,11,0.15);
+      border: 1px solid rgba(232,49,11,0.3);
+      color: #f87171;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .status-진행 { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+    .status-낙찰 { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+    .status-변경 { background: rgba(234,179,8,0.15);  border: 1px solid rgba(234,179,8,0.3);  color: #fde047; }
+    .status-기타 { background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.2);color: #94a3b8; }
+
+    .case-no {
+      font-size: 11px; color: var(--sub);
+      margin-left: auto; flex-shrink: 0;
+    }
+
+    .item-addr {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .item-prices {
+      display: flex; gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .price-block { flex: 1; }
+    .price-label { font-size: 10px; color: var(--sub); margin-bottom: 2px; }
+    .price-val   { font-size: 14px; font-weight: 700; color: var(--text); }
+    .price-val.highlight { color: var(--gold); }
+
+    .item-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .bid-time { font-size: 12px; color: var(--sub); }
+    .bid-time strong { color: var(--text); }
+
+    .view-more {
+      font-size: 11px; color: var(--sub);
+      display: flex; align-items: center; gap: 3px;
+    }
+
+    /* ── 빈 화면 ── */
+    #emptyView {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--sub);
+    }
+    #emptyView .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    #emptyView .empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    #emptyView .empty-desc  { font-size: 13px; line-height: 1.6; }
+
+    /* ── 오류 ── */
+    #errorView {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    #errorView .err-icon  { font-size: 44px; margin-bottom: 12px; }
+    #errorView .err-title { font-size: 16px; font-weight: 700; color: #f87171; margin-bottom: 8px; }
+    #errorView .err-desc  { font-size: 13px; color: var(--sub); line-height: 1.6; margin-bottom: 20px; }
+
+    .btn-red {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--red);
+      color: #fff;
+      font-size: 14px; font-weight: 700;
+      border-radius: 10px;
+      text-decoration: none;
+    }
+
+    /* ── 파라미터 없는 경우 ── */
+    #noParamView {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+    }
+    #noParamView .np-icon  { font-size: 48px; margin-bottom: 14px; }
+    #noParamView .np-title { font-size: 18px; font-weight: 800; color: #f87171; margin-bottom: 8px; }
+    #noParamView .np-desc  { font-size: 13px; color: var(--sub); line-height: 1.6; margin-bottom: 24px; }
+
+    /* ── 더보기 ── */
+    #loadMore {
+      display: none;
+      width: calc(100% - 24px);
+      margin: 0 12px 20px;
+      padding: 13px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--sub);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    #loadMore:hover { border-color: var(--sub); color: var(--text); }
   </style>
 </head>
 <body>
 
-<div class="card" id="mainCard">
-  <div class="logo-bar">
-    <div class="logo-icon">두</div>
-    <span class="logo-text">두인경매</span>
+<!-- ★ 이 값을 Cloudflare Worker 배포 후 실제 URL로 교체하세요 ★ -->
+<script>
+  // Cloudflare Worker 주소를 여기에 입력하세요.
+  // 예: 'https://duin-proxy.아이디.workers.dev'
+  // 아직 설정 전이면 빈 문자열('')로 두세요.
+  const WORKER_URL = 'https://polished-meadow-ca23.giyong8312005.workers.dev';
+</script>
+
+<!-- 상단 바 -->
+<div class="top-bar">
+  <div class="logo-box">두</div>
+  <div class="top-bar-info">
+    <div class="top-bar-name" id="headerName">두인경매</div>
+    <div class="top-bar-date" id="headerDate"></div>
   </div>
-
-  <div class="date-badge" id="dateBadge">2026년 7월 1일 (수)</div>
-
-  <div class="court-name" id="courtName">서울중앙지방법원</div>
-  <div class="court-sub" id="courtSub">8계 · 금일 경매물건</div>
-
-  <div class="spinner-wrap">
-    <div class="spinner"></div>
-    <div>
-      <div class="loading-text">두인경매로 이동 중</div>
-      <div class="countdown" id="countdown">3</div>
-    </div>
-  </div>
-
-  <button class="btn-main" id="btnGo" onclick="goNow()">
-    지금 바로 보기
-  </button>
-
-  <div class="footer-note">
-    두인경매(dooinauction.com)의 금일 경매물건 페이지로 이동합니다
-  </div>
+  <a class="top-bar-link" id="dooinLink"
+     href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
+    두인경매 ↗
+  </a>
 </div>
 
-<!-- 파라미터 없는 경우 오류 카드 -->
-<div class="card error-card" id="errorCard">
-  <div class="error-icon">⚠️</div>
-  <div class="error-title">QR코드 정보가 없습니다</div>
-  <div class="error-desc">
+<!-- 로딩 -->
+<div id="loadingView">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">경매물건 불러오는 중...</div>
+</div>
+
+<!-- 통계 -->
+<div id="statsBar"></div>
+
+<!-- 목록 -->
+<div id="listView"></div>
+
+<!-- 더보기 -->
+<button id="loadMore" onclick="loadMore()">더 보기</button>
+
+<!-- 빈 화면 -->
+<div id="emptyView">
+  <div class="empty-icon">📋</div>
+  <div class="empty-title">오늘 경매물건이 없습니다</div>
+  <div class="empty-desc" id="emptyDesc"></div>
+</div>
+
+<!-- 오류 -->
+<div id="errorView">
+  <div class="err-icon">⚠️</div>
+  <div class="err-title" id="errTitle">데이터를 불러올 수 없습니다</div>
+  <div class="err-desc" id="errDesc"></div>
+  <a class="btn-red" href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
+    두인경매 직접 방문하기
+  </a>
+</div>
+
+<!-- 파라미터 없음 -->
+<div id="noParamView">
+  <div class="np-icon">⚠️</div>
+  <div class="np-title">QR코드 정보가 없습니다</div>
+  <div class="np-desc">
     올바른 QR코드를 스캔해 주세요.<br>
     두인경매 경매일정 페이지로 이동합니다.
   </div>
-  <a class="btn-main" href="https://www.dooinauction.com/ca/caDtList.php"
-     style="margin-top:24px; display:block;">
+  <a class="btn-red" href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
     두인경매 경매일정 보기
   </a>
 </div>
 
-<!-- 자동 제출 폼 (dooinauction.com으로 이동) -->
-<form id="searchForm" method="GET"
-      action="https://www.dooinauction.com/ca/caDtList.php"
-      style="display:none;">
-  <input type="hidden" name="courtCd1" id="fCourtCd1">
-  <input type="hidden" name="courtCd2" id="fCourtCd2">
-  <input type="hidden" name="bgnDt"    id="fBgnDt">
-  <input type="hidden" name="endDt"    id="fEndDt">
-  <input type="hidden" name="srchCase" value="srchBidDt">
-  <input type="hidden" name="stat"     value="1">
-</form>
-
 <script>
-(function () {
-  /* ── 날짜 포맷 ── */
-  const DAYS = ['일','월','화','수','목','금','토'];
-  const now  = new Date();
-  const yyyy = now.getFullYear();
-  const mm   = String(now.getMonth() + 1).padStart(2,'0');
-  const dd   = String(now.getDate()).padStart(2,'0');
-  const dayK = DAYS[now.getDay()];
-  const todayLabel = `${yyyy}년 ${Number(mm)}월 ${Number(dd)}일 (${dayK})`;
-  const todayISO   = `${yyyy}-${mm}-${dd}`;
+/* ═══════════════════════════════
+   초기화
+═══════════════════════════════ */
+const DAYS = ['일','월','화','수','목','금','토'];
+const now  = new Date();
+const yyyy = now.getFullYear();
+const mm   = String(now.getMonth()+1).padStart(2,'0');
+const dd   = String(now.getDate()).padStart(2,'0');
+const dayK = DAYS[now.getDay()];
+const TODAY_LABEL = `${yyyy}년 ${Number(mm)}월 ${Number(dd)}일 (${dayK})`;
+const TODAY_ISO   = `${yyyy}-${mm}-${dd}`;
 
-  document.getElementById('dateBadge').textContent = todayLabel;
+document.getElementById('headerDate').textContent = TODAY_LABEL;
 
-  /* ── URL 파라미터 파싱 ── */
-  const sp = new URLSearchParams(window.location.search);
-  const courtCode = sp.get('c');   // 법원 코드
-  const deptCode  = sp.get('d');   // 계 코드
-  const nameRaw   = sp.get('n');   // 표시 이름 (예: "서울중앙 8계")
+const sp = new URLSearchParams(window.location.search);
+const courtCode = sp.get('c');
+const deptCode  = sp.get('d');
+const nameRaw   = sp.get('n');
 
-  /* 파라미터 없으면 오류 카드 표시 */
-  if (!courtCode || !deptCode) {
-    document.getElementById('mainCard').style.display  = 'none';
-    document.getElementById('errorCard').classList.add('show');
+/* 파라미터 없으면 안내 화면 */
+if (!courtCode || !deptCode) {
+  show('noParamView');
+  hide('loadingView');
+} else {
+  init();
+}
+
+/* ═══════════════════════════════
+   메인 흐름
+═══════════════════════════════ */
+let allItems  = [];
+let displayed = 0;
+const PAGE_SIZE = 20;
+
+async function init() {
+  /* 이름 표시 */
+  const label = nameRaw ? decodeURIComponent(nameRaw) : '법원 경매물건';
+  document.getElementById('headerName').textContent = label;
+  document.title = label + ' · 오늘의 경매물건';
+
+  /* Worker URL이 없으면 dooinauction.com으로 이동 안내 */
+  if (!WORKER_URL) {
+    hide('loadingView');
+    show('errorView');
+    document.getElementById('errTitle').textContent = 'Worker 설정이 필요합니다';
+    document.getElementById('errDesc').innerHTML =
+      'Cloudflare Worker를 아직 설정하지 않았습니다.<br>' +
+      '<code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">' +
+      'index.html</code> 파일의 <code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">WORKER_URL</code>' +
+      ' 을 입력해 주세요.';
     return;
   }
 
-  /* ── 이름 표시 ── */
-  if (nameRaw) {
-    const decoded = decodeURIComponent(nameRaw);
-    /* "서울중앙 8계" → 법원명: "서울중앙지방법원", 계: "8계" */
-    const parts = decoded.split(' ');
-    const dept  = parts.pop();      // 마지막 단어 = "8계"
-    const court = parts.join(' ');  // 나머지 = 법원명
-    document.getElementById('courtName').textContent = courtFullName(court);
-    document.getElementById('courtSub').textContent  = dept + ' · 금일 경매물건';
-  }
+  document.getElementById('loadingText').textContent =
+    label + ' 물건 불러오는 중...';
 
-  /* ── 폼 값 세팅 ── */
-  /* dooinauction.com의 caDtList.php가 GET 파라미터를 받는지 테스트용으로
-     AuctList.php에서 쓰는 sptArr 형식도 함께 전송 */
-  const form = document.getElementById('searchForm');
-  form.action = 'https://www.dooinauction.com/ca/caDtList.php';
+  try {
+    const workerUrl = `${WORKER_URL.replace(/\/$/, '')}/?c=${encodeURIComponent(courtCode)}&d=${encodeURIComponent(deptCode)}`;
+    const resp = await fetch(workerUrl);
 
-  /* 법원/계 코드 - sptArr[0][] 배열로 두 값 제출 */
-  ['fCourtCd1','fCourtCd2'].forEach(function(id, i) {
-    form.removeChild(document.getElementById(id));
-  });
-  addHidden(form, 'sptArr[0][]', courtCode);
-  addHidden(form, 'sptArr[0][]', deptCode);
+    if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
 
-  document.getElementById('fBgnDt').value = todayISO;
-  document.getElementById('fEndDt').value = todayISO;
+    const text = await resp.text();
+    const data = parseResponse(text);
 
-  function addHidden(frm, name, val) {
-    const inp = document.createElement('input');
-    inp.type  = 'hidden';
-    inp.name  = name;
-    inp.value = val;
-    frm.appendChild(inp);
-  }
+    hide('loadingView');
 
-  /* ── 카운트다운 & 자동 이동 ── */
-  let count = 3;
-  const cdEl = document.getElementById('countdown');
-
-  const timer = setInterval(function () {
-    count--;
-    cdEl.textContent = count;
-    if (count <= 0) {
-      clearInterval(timer);
-      goNow();
+    if (!data || data.length === 0) {
+      show('emptyView');
+      document.getElementById('emptyDesc').textContent =
+        label + ' · ' + TODAY_LABEL;
+      return;
     }
-  }, 1000);
 
-  window.goNow = function () {
-    clearInterval(timer);
-    document.getElementById('searchForm').submit();
-  };
+    allItems = data;
+    renderStats(data, label);
+    renderItems();
 
-  /* ── 법원 전체 이름 변환 ── */
-  function courtFullName(short) {
-    const MAP = {
-      '서울중앙':'서울중앙지방법원','서울동부':'서울동부지방법원',
-      '서울서부':'서울서부지방법원','서울남부':'서울남부지방법원',
-      '서울북부':'서울북부지방법원','의정부 본원':'의정부지방법원',
-      '의정부 고양':'의정부지방법원 고양지원','의정부 남양주':'의정부지방법원 남양주지원',
-      '인천 본원':'인천지방법원','인천 부천':'인천지방법원 부천지원',
-      '수원 본원':'수원지방법원','수원 성남':'수원지방법원 성남지원',
-      '수원 여주':'수원지방법원 여주지원','수원 평택':'수원지방법원 평택지원',
-      '수원 안산':'수원지방법원 안산지원','수원 안양':'수원지방법원 안양지원',
-      '춘천 본원':'춘천지방법원','춘천 강릉':'춘천지방법원 강릉지원',
-      '춘천 원주':'춘천지방법원 원주지원','춘천 속초':'춘천지방법원 속초지원',
-      '춘천 영월':'춘천지방법원 영월지원','청주 본원':'청주지방법원',
-      '청주 충주':'청주지방법원 충주지원','청주 제천':'청주지방법원 제천지원',
-      '청주 영동':'청주지방법원 영동지원','대전 본원':'대전지방법원',
-      '대전 홍성':'대전지방법원 홍성지원','대전 논산':'대전지방법원 논산지원',
-      '대전 천안':'대전지방법원 천안지원','대전 공주':'대전지방법원 공주지원',
-      '대전 서산':'대전지방법원 서산지원','대구 본원':'대구지방법원',
-      '대구 서부':'대구지방법원 서부지원','대구 안동':'대구지방법원 안동지원',
-      '대구 경주':'대구지방법원 경주지원','대구 김천':'대구지방법원 김천지원',
-      '대구 상주':'대구지방법원 상주지원','대구 의성':'대구지방법원 의성지원',
-      '대구 영덕':'대구지방법원 영덕지원','대구 포항':'대구지방법원 포항지원',
-      '부산 본원':'부산지방법원','부산 동부':'부산지방법원 동부지원',
-      '부산 서부':'부산지방법원 서부지원','울산':'울산지방법원',
-      '창원 본원':'창원지방법원','창원 마산':'창원지방법원 마산지원',
-      '창원 진주':'창원지방법원 진주지원','창원 통영':'창원지방법원 통영지원',
-      '창원 밀양':'창원지방법원 밀양지원','창원 거창':'창원지방법원 거창지원',
-      '광주 본원':'광주지방법원','광주 목포':'광주지방법원 목포지원',
-      '광주 장흥':'광주지방법원 장흥지원','광주 순천':'광주지방법원 순천지원',
-      '광주 해남':'광주지방법원 해남지원','전주 본원':'전주지방법원',
-      '전주 군산':'전주지방법원 군산지원','전주 정읍':'전주지방법원 정읍지원',
-      '전주 남원':'전주지방법원 남원지원','제주':'제주지방법원',
-    };
-    return MAP[short] || short + '지방법원';
+  } catch (err) {
+    hide('loadingView');
+    show('errorView');
+    document.getElementById('errDesc').textContent =
+      err.message + '\n잠시 후 다시 시도하거나 두인경매에 직접 방문해 주세요.';
   }
-})();
+}
+
+/* ═══════════════════════════════
+   응답 파싱 (JSON 대응)
+═══════════════════════════════ */
+function parseResponse(text) {
+  const trimmed = text.trim();
+
+  /* JSON 시도 */
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      const json = JSON.parse(trimmed);
+
+      /* 배열 형태 */
+      if (Array.isArray(json)) return json;
+
+      /* { list: [...] } 형태 */
+      if (json.list   && Array.isArray(json.list))   return json.list;
+      if (json.data   && Array.isArray(json.data))   return json.data;
+      if (json.items  && Array.isArray(json.items))  return json.items;
+      if (json.result && Array.isArray(json.result)) return json.result;
+
+      /* 단일 객체 */
+      return [json];
+    } catch (_) {}
+  }
+
+  /* JSON 파싱 실패 → 빈 배열 (HTML 응답 등) */
+  return [];
+}
+
+/* ═══════════════════════════════
+   통계 바
+═══════════════════════════════ */
+function renderStats(items, label) {
+  const bar = document.getElementById('statsBar');
+  bar.innerHTML =
+    '<strong>' + items.length + '건</strong> &nbsp;' + label + ' · ' + TODAY_LABEL;
+  bar.style.display = 'block';
+}
+
+/* ═══════════════════════════════
+   목록 렌더링
+═══════════════════════════════ */
+function renderItems() {
+  const container = document.getElementById('listView');
+  const end       = Math.min(displayed + PAGE_SIZE, allItems.length);
+
+  for (let i = displayed; i < end; i++) {
+    container.appendChild(buildCard(allItems[i], i));
+  }
+  displayed = end;
+
+  show('listView');
+
+  const more = document.getElementById('loadMore');
+  if (displayed < allItems.length) {
+    more.style.display = 'block';
+    more.textContent   = `더 보기 (${allItems.length - displayed}건 남음)`;
+  } else {
+    more.style.display = 'none';
+  }
+}
+
+function loadMore() {
+  renderItems();
+}
+
+/* ═══════════════════════════════
+   카드 생성
+═══════════════════════════════ */
+function buildCard(item, idx) {
+  /* 필드 추출 (dooinauction.com 응답 키 이름 대응) */
+  const caseNo   = v(item, ['caseNo','case_no','CaseNo','saleNo','CASE_NO']) || '';
+  const type     = v(item, ['ctgrNm','ctgr_nm','type','kindNm','KIND_NM','물건종류']) || '';
+  const addr     = v(item, ['addr','address','addrNm','ADDR','lclsNm','sojaJi','소재지']) || '주소 정보 없음';
+  const apslAmt  = num(v(item, ['apslAmt','apsl_amt','감정가','APSL_AMT']));
+  const minbAmt  = num(v(item, ['minbAmt','minb_amt','최저가','lowAmt','LOW_AMT','MINB_AMT']));
+  const bidDt    = v(item, ['bidDt','bid_dt','saleDt','SALE_DT','매각기일']) || '';
+  const bidTm    = v(item, ['bidTm','bid_tm','saleTm','SALE_TM','BIDTM','입찰시간']) || '';
+  const stat     = v(item, ['statNm','stat_nm','진행상태','STATUS_NM','status']) || '';
+  const caseYear = v(item, ['caseYear','caseYr','CASE_YEAR']) || '';
+  const caseSeq  = v(item, ['caseSeq','CASE_SEQ','caseIdx']) || '';
+
+  /* 두인경매 상세 페이지 링크 */
+  const detailLink = buildDetailLink(caseNo, caseYear, caseSeq, item);
+
+  /* 상태 배지 색 */
+  let statClass = 'status-기타';
+  if (stat.includes('진행') || stat.includes('신건')) statClass = 'status-진행';
+  else if (stat.includes('낙찰') || stat.includes('매각'))     statClass = 'status-낙찰';
+  else if (stat.includes('변경') || stat.includes('연기'))     statClass = 'status-변경';
+
+  const a = document.createElement('a');
+  a.className = 'auction-item';
+  a.href      = detailLink;
+  a.target    = '_blank';
+  a.rel       = 'noopener';
+
+  a.innerHTML = `
+    <div class="item-top">
+      ${type ? `<span class="type-badge">${esc(type)}</span>` : ''}
+      ${stat ? `<span class="status-badge ${statClass}">${esc(stat)}</span>` : ''}
+      ${caseNo ? `<span class="case-no">${esc(caseNo)}</span>` : ''}
+    </div>
+    <div class="item-addr">${esc(addr)}</div>
+    <div class="item-prices">
+      <div class="price-block">
+        <div class="price-label">감정가</div>
+        <div class="price-val">${fmtAmt(apslAmt)}</div>
+      </div>
+      <div class="price-block">
+        <div class="price-label">최저입찰가</div>
+        <div class="price-val highlight">${fmtAmt(minbAmt)}</div>
+      </div>
+    </div>
+    <div class="item-bottom">
+      <div class="bid-time">입찰: <strong>${esc(bidDt)} ${esc(bidTm)}</strong></div>
+      <div class="view-more">상세보기 →</div>
+    </div>`;
+
+  return a;
+}
+
+/* ═══════════════════════════════
+   상세 링크 생성
+═══════════════════════════════ */
+function buildDetailLink(caseNo, caseYear, caseSeq, item) {
+  /* 사건번호 형식: "2024타경3887" → year=2024, seq=3887 */
+  if (caseYear && caseSeq) {
+    return `https://www.dooinauction.com/ca/caDtView.php?caseYear=${caseYear}&caseSeq=${caseSeq}`;
+  }
+
+  /* caseNo에서 연도/번호 추출 시도 */
+  if (caseNo) {
+    const m = String(caseNo).match(/(\d{4})[^\d]*(\d+)/);
+    if (m) {
+      return `https://www.dooinauction.com/ca/caDtView.php?caseYear=${m[1]}&caseSeq=${m[2]}`;
+    }
+  }
+
+  /* fallback: 검색 페이지 */
+  return 'https://www.dooinauction.com/ca/caDtList.php';
+}
+
+/* ═══════════════════════════════
+   유틸
+═══════════════════════════════ */
+function v(obj, keys) {
+  for (const k of keys) {
+    if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
+  }
+  return null;
+}
+
+function num(val) {
+  if (val === null || val === undefined) return 0;
+  return Number(String(val).replace(/[^0-9]/g, '')) || 0;
+}
+
+function fmtAmt(n) {
+  if (!n) return '-';
+  if (n >= 100000000) {
+    const eok = Math.floor(n / 100000000);
+    const man = Math.floor((n % 100000000) / 10000);
+    return man ? eok + '억 ' + man.toLocaleString() + '만' : eok + '억';
+  }
+  if (n >= 10000) return Math.floor(n/10000).toLocaleString() + '만';
+  return n.toLocaleString() + '원';
+}
+
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function show(id) { document.getElementById(id).style.display = ''; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
 </script>
 </body>
 </html>
