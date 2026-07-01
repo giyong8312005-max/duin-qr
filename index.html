@@ -415,7 +415,8 @@ function parseResponse(text) {
       /* 배열 형태 */
       if (Array.isArray(json)) return json;
 
-      /* { list: [...] } 형태 */
+      /* { res: [...] } 또는 { list: [...] } 등 다양한 형태 */
+      if (json.res    && Array.isArray(json.res))    return json.res;
       if (json.list   && Array.isArray(json.list))   return json.list;
       if (json.data   && Array.isArray(json.data))   return json.data;
       if (json.items  && Array.isArray(json.items))  return json.items;
