@@ -248,12 +248,11 @@
 </head>
 <body>
 
-<!-- ★ 이 값을 Cloudflare Worker 배포 후 실제 URL로 교체하세요 ★ -->
+<!-- ★ Worker URL은 config.js 파일에서 관리합니다 ★ -->
+<script src="config.js"></script>
 <script>
-  // Cloudflare Worker 주소를 여기에 입력하세요.
-  // 예: 'https://duin-proxy.아이디.workers.dev'
-  // 아직 설정 전이면 빈 문자열('')로 두세요.
-  const WORKER_URL = 'https://polished-meadow-ca23.giyong8312005.workers.dev';
+  // config.js가 없거나 로드 실패 시 빈 문자열로 폴백
+  const WORKER_URL = (window.DUIN_CONFIG && window.DUIN_CONFIG.WORKER_URL) || '';
 </script>
 
 <!-- 상단 바 -->
@@ -336,9 +335,11 @@ const nameRaw   = sp.get('n');
 
 /* 파라미터 없으면 안내 화면 */
 if (!courtCode || !deptCode) {
+  console.warn('[두인경매] URL 파라미터 없음. 안내 화면 표시.');
   show('noParamView');
   hide('loadingView');
 } else {
+  console.log(`[두인경매] 초기화 시작 — 법원코드: ${courtCode}, 계코드: ${deptCode}`);
   init();
 }
 
@@ -355,15 +356,16 @@ async function init() {
   document.getElementById('headerName').textContent = label;
   document.title = label + ' · 오늘의 경매물건';
 
-  /* Worker URL이 없으면 dooinauction.com으로 이동 안내 */
+  /* Worker URL이 없으면 config.js 설정 안내 */
   if (!WORKER_URL) {
+    console.error('[두인경매] WORKER_URL이 비어 있습니다. config.js를 확인해 주세요.');
     hide('loadingView');
     show('errorView');
     document.getElementById('errTitle').textContent = 'Worker 설정이 필요합니다';
     document.getElementById('errDesc').innerHTML =
       'Cloudflare Worker를 아직 설정하지 않았습니다.<br>' +
       '<code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">' +
-      'index.html</code> 파일의 <code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">WORKER_URL</code>' +
+      'config.js</code> 파일의 <code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">WORKER_URL</code>' +
       ' 을 입력해 주세요.';
     return;
   }
@@ -373,16 +375,21 @@ async function init() {
 
   try {
     const workerUrl = `${WORKER_URL.replace(/\/$/, '')}/?c=${encodeURIComponent(courtCode)}&d=${encodeURIComponent(deptCode)}`;
+    console.log(`[두인경매] Worker 호출: ${workerUrl}`);
+
     const resp = await fetch(workerUrl);
+    console.log(`[두인경매] Worker 응답 상태: ${resp.status}`);
 
     if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
 
     const text = await resp.text();
     const data = parseResponse(text);
+    console.log(`[두인경매] 파싱 결과: ${data ? data.length : 0}건`);
 
     hide('loadingView');
 
     if (!data || data.length === 0) {
+      console.log('[두인경매] 오늘 경매물건 없음.');
       show('emptyView');
       document.getElementById('emptyDesc').textContent =
         label + ' · ' + TODAY_LABEL;
@@ -394,6 +401,7 @@ async function init() {
     renderItems();
 
   } catch (err) {
+    console.error('[두인경매] 데이터 로드 실패:', err.message);
     hide('loadingView');
     show('errorView');
     document.getElementById('errDesc').textContent =
