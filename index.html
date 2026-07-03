@@ -371,7 +371,7 @@ async function init() {
   }
 
   document.getElementById('loadingText').textContent =
-    label + ' 물건 불러오는 중...';
+    label + ' 물건 불러오는 중... (건수가 많으면 잠시 걸릴 수 있습니다)';
 
   try {
     const workerUrl = `${WORKER_URL.replace(/\/$/, '')}/?c=${encodeURIComponent(courtCode)}&d=${encodeURIComponent(deptCode)}`;
@@ -383,8 +383,10 @@ async function init() {
     if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
 
     const text = await resp.text();
-    const data = parseResponse(text);
-    console.log(`[두인경매] 파싱 결과: ${data ? data.length : 0}건`);
+    const parsed = parseResponse(text);
+    const data = parsed.items;
+    const totalCnt = parsed.totalCnt;
+    console.log(`[두인경매] 파싱 결과: ${data ? data.length : 0}건 (totalCnt=${totalCnt ?? '?'})`);
 
     hide('loadingView');
 
@@ -414,6 +416,7 @@ async function init() {
 ═══════════════════════════════ */
 function parseResponse(text) {
   const trimmed = text.trim();
+  const empty = { items: [], totalCnt: 0 };
 
   /* JSON 시도 */
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
@@ -421,23 +424,25 @@ function parseResponse(text) {
       const json = JSON.parse(trimmed);
 
       /* 배열 형태 */
-      if (Array.isArray(json)) return json;
+      if (Array.isArray(json)) return { items: json, totalCnt: json.length };
+
+      const totalCnt = json.totalCnt != null ? Number(json.totalCnt) : null;
 
       /* dooinauction.com: { item: [...], totalCnt: N } */
-      if (json.item   && Array.isArray(json.item))   return json.item;
-      if (json.res    && Array.isArray(json.res))    return json.res;
-      if (json.list   && Array.isArray(json.list))   return json.list;
-      if (json.data   && Array.isArray(json.data))   return json.data;
-      if (json.items  && Array.isArray(json.items))  return json.items;
-      if (json.result && Array.isArray(json.result)) return json.result;
+      if (json.item   && Array.isArray(json.item))   return { items: json.item, totalCnt };
+      if (json.res    && Array.isArray(json.res))    return { items: json.res, totalCnt };
+      if (json.list   && Array.isArray(json.list))   return { items: json.list, totalCnt };
+      if (json.data   && Array.isArray(json.data))   return { items: json.data, totalCnt };
+      if (json.items  && Array.isArray(json.items))  return { items: json.items, totalCnt };
+      if (json.result && Array.isArray(json.result)) return { items: json.result, totalCnt };
 
       /* 단일 객체 */
-      return [json];
+      return { items: [json], totalCnt: 1 };
     } catch (_) {}
   }
 
   /* JSON 파싱 실패 → 빈 배열 (HTML 응답 등) */
-  return [];
+  return empty;
 }
 
 /* ═══════════════════════════════
