@@ -678,7 +678,7 @@
         </div>
         <label class="consent-row">
           <input type="checkbox" id="inputConsent" required>
-          <span>개인정보(휴대폰) 수집·이용에 동의합니다. 경매 안내 및 서비스 제공 목적으로만 사용됩니다.</span>
+          <span id="consentText">개인정보(휴대폰) 수집·이용에 동의합니다. 경매 안내 및 서비스 제공 목적으로만 사용됩니다.</span>
         </label>
         <button type="submit" class="btn-submit" id="btnSubmit">쿠폰 받기</button>
       </form>
@@ -706,6 +706,16 @@ const TODAY_LABEL = `${yyyy}년 ${Number(mm)}월 ${Number(dd)}일 (${dayK})`;
 const TODAY_ISO   = `${yyyy}-${mm}-${dd}`;
 
 document.getElementById('headerDate').textContent = TODAY_LABEL;
+
+(function setupConsentPrivacy() {
+  const el = document.getElementById('consentText');
+  if (!el) return;
+  const url = (window.DUIN_CONFIG && window.DUIN_CONFIG.PRIVACY_URL) || 'privacy.html';
+  el.innerHTML =
+    '개인정보(휴대폰) 수집·이용에 동의합니다. ' +
+    '<a href="' + url + '" target="_blank" rel="noopener" style="color:#0ea5e9;font-weight:600">처리 안내</a>를 확인했습니다. ' +
+    '경매 안내 및 서비스 제공 목적으로만 사용됩니다.';
+})();
 
 const sp = new URLSearchParams(window.location.search);
 const courtCode = sp.get('c');
@@ -895,19 +905,7 @@ document.getElementById('couponForm').addEventListener('submit', async function(
     });
     const json = await resp.json();
     if (!resp.ok || !json.ok) {
-      if (json.error && json.error.indexOf('법원코드') >= 0) {
-        console.warn('[쿠폰] 구버전 Worker — 로컬 쿠폰 발급 (Worker 재배포 필요)');
-        saveCouponAccess(buildLocalCouponAccess(phone, couponCode));
-        showCouponSuccess('물건을 선택해 주세요.\n(Worker 미배포: DB 저장은 재배포 후 가능)');
-        return;
-      }
-      if (json.error && json.error.indexOf('휴대폰') >= 0 && isValidKrMobile(phone)) {
-        console.warn('[쿠폰] Worker 휴대폰 검증 오류 — 로컬 쿠폰 발급:', phone);
-        saveCouponAccess(buildLocalCouponAccess(phone, couponCode));
-        showCouponSuccess('물건을 선택해 주세요.\n(Worker 재배포 후 DB 저장 가능)');
-        return;
-      }
-      throw new Error(json.error || '쿠폰 발급에 실패했습니다.');
+      throw new Error(json.error || '쿠폰 발급에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     }
 
     saveCouponAccess(json.access);
