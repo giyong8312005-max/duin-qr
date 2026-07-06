@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
   <title>두인경매 - 오늘의 경매물건</title>
   <style>
     :root {
-      --red:    #e8310b;
-      --gold:   #e8c56b;
-      --bg:     #0d1b2a;
-      --card:   #1a2e45;
-      --border: rgba(255,255,255,0.08);
-      --text:   #f1f5f9;
-      --sub:    #94a3b8;
-      --dim:    #334155;
+      --sky:       #0ea5e9;
+      --sky-light: #e0f2fe;
+      --sky-soft:  #f0f9ff;
+      --white:     #ffffff;
+      --text:      #0f172a;
+      --sub:       #64748b;
+      --border:    #e2e8f0;
+      --red:       #e8310b;
+      --radius:    14px;
     }
 
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -21,66 +23,285 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
                    'Noto Sans KR', '맑은 고딕', sans-serif;
-      background: var(--bg);
+      background: #ffffff;
       color: var(--text);
       min-height: 100vh;
+      line-height: 1.5;
     }
 
-    /* ── 헤더 ── */
-    .top-bar {
-      background: #0a1520;
+    /* ── 상단 히어로 (법원명 · 날짜 · 쿠폰) ── */
+    #pageHero {
+      display: none;
+      background: #ffffff;
+      padding: 20px 16px 16px;
       border-bottom: 1px solid var(--border);
-      padding: 12px 16px;
+    }
+
+    .hero-top {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      margin-bottom: 14px;
     }
 
-    .logo-box {
-      width: 32px; height: 32px;
-      background: var(--red);
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 900; color: #fff; flex-shrink: 0;
+    .hero-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
     }
 
-    .top-bar-info { flex: 1; min-width: 0; }
-    .top-bar-name {
-      font-size: 15px; font-weight: 800;
-      color: var(--gold);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .hero-logo {
+      flex-shrink: 0;
+      height: 36px;
+      display: block;
     }
-    .top-bar-date { font-size: 11px; color: var(--sub); margin-top: 1px; }
+
+    .hero-logo img {
+      height: 36px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+    }
 
     .top-bar-link {
-      font-size: 11px; color: var(--sub);
+      font-size: 12px;
+      color: var(--sky);
       text-decoration: none;
-      border: 1px solid var(--dim);
-      padding: 5px 10px;
-      border-radius: 6px;
+      font-weight: 600;
       white-space: nowrap;
       flex-shrink: 0;
+      padding: 6px 10px;
+      background: var(--white);
+      border-radius: 8px;
+      border: 1px solid var(--border);
     }
-    .top-bar-link:hover { border-color: var(--sub); color: var(--text); }
+
+    .hero-court {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      word-break: keep-all;
+    }
+
+    .hero-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      color: var(--sky);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #7dd3fc;
+      box-shadow: 0 1px 3px rgba(14,165,233,0.12);
+      margin-bottom: 14px;
+    }
+
+    .hero-date .dot {
+      width: 6px; height: 6px;
+      background: var(--sky);
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    /* ── 쿠폰 배너 ── */
+    #couponBanner {
+      display: none;
+      margin-top: 4px;
+    }
+
+    .coupon-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      border: 2px solid var(--sky);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 4px 14px rgba(14,165,233,0.18);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .coupon-link:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(14,165,233,0.12);
+    }
+
+    .coupon-icon {
+      width: 44px; height: 44px;
+      background: var(--sky-light);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .coupon-text { flex: 1; min-width: 0; }
+    .coupon-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .coupon-desc {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .coupon-btn {
+      flex-shrink: 0;
+      background: var(--sky);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .coupon-link.registered {
+      border-color: #86efac;
+      background: #f0fdf4;
+      box-shadow: 0 4px 14px rgba(34,197,94,0.12);
+    }
+    .coupon-link.registered .coupon-icon { background: #dcfce7; }
+    .coupon-code-display {
+      font-size: 15px;
+      font-weight: 800;
+      color: #059669;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── 쿠폰 모달 ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal-sheet {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px 32px;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .modal-icon {
+      width: 52px; height: 52px;
+      background: var(--sky-light);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 14px;
+    }
+
+    .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .modal-desc { font-size: 14px; color: var(--sub); margin-bottom: 20px; line-height: 1.5; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .form-group label .req { color: #e8310b; }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+    }
+
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 18px;
+      line-height: 1.45;
+    }
+    .consent-row input { margin-top: 3px; flex-shrink: 0; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--sky);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .form-error {
+      color: #e8310b;
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .form-error.show { display: block; }
+
+    .coupon-success {
+      display: none;
+      text-align: center;
+      padding: 8px 0 4px;
+    }
+    .coupon-success.show { display: block; }
+    .coupon-success-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .coupon-success-msg { font-size: 13px; color: var(--sub); margin-top: 4px; }
+
+    #couponFormWrap.hidden { display: none; }
+
+    /* ── 본문 영역 ── */
+    .main-content {
+      padding: 0 16px 40px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
 
     /* ── 로딩 ── */
     #loadingView {
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: calc(100vh - 57px);
-      gap: 16px;
-      padding: 24px;
+      padding: 48px 16px;
+      gap: 14px;
     }
 
     .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: var(--gold);
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--sky);
       border-radius: 50%;
       animation: spin 0.9s linear infinite;
     }
@@ -88,229 +309,387 @@
 
     .loading-text { font-size: 14px; color: var(--sub); }
 
-    /* ── 통계 바 ── */
+    /* ── 통계 ── */
     #statsBar {
       display: none;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
+      padding: 14px 0 8px;
       font-size: 13px;
       color: var(--sub);
     }
-
-    #statsBar strong { color: var(--gold); font-size: 16px; }
+    #statsBar strong {
+      color: var(--sky);
+      font-size: 18px;
+      font-weight: 800;
+    }
 
     /* ── 목록 ── */
-    #listView { display: none; padding: 12px 12px 40px; }
+    #listView { display: none; }
 
     .auction-item {
-      background: var(--card);
+      background: var(--white);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: var(--radius);
+      padding: 16px;
       margin-bottom: 10px;
       text-decoration: none;
       display: block;
-      transition: border-color 0.2s;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .auction-item:active { border-color: var(--gold); }
+    .auction-item:active {
+      border-color: #7dd3fc;
+      box-shadow: 0 2px 8px rgba(14,165,233,0.1);
+    }
+
+    .item-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .item-thumb-wrap {
+      flex-shrink: 0;
+      width: 96px;
+      height: 72px;
+    }
+
+    .item-thumb {
+      width: 96px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: block;
+      background: #f1f5f9;
+    }
+
+    .item-thumb-placeholder {
+      width: 96px;
+      height: 72px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #cbd5e1;
+    }
+
+    .item-body {
+      flex: 1;
+      min-width: 0;
+    }
 
     .item-top {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
 
     .type-badge {
-      background: rgba(232,49,11,0.15);
-      border: 1px solid rgba(232,49,11,0.3);
-      color: #f87171;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--red);
       font-size: 11px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      white-space: nowrap;
-      flex-shrink: 0;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .item-type {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      margin-bottom: 4px;
     }
 
     .status-badge {
       font-size: 11px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      white-space: nowrap;
-      flex-shrink: 0;
+      padding: 3px 8px;
+      border-radius: 6px;
     }
-    .status-진행 { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
-    .status-낙찰 { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
-    .status-변경 { background: rgba(234,179,8,0.15);  border: 1px solid rgba(234,179,8,0.3);  color: #fde047; }
-    .status-기타 { background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.2);color: #94a3b8; }
+    .status-진행 { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
+    .status-낙찰 { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; }
+    .status-변경 { background: #fffbeb; border: 1px solid #fde68a; color: #d97706; }
+    .status-기타 { background: #f8fafc; border: 1px solid var(--border); color: var(--sub); }
 
     .case-no {
-      font-size: 11px; color: var(--sub);
-      margin-left: auto; flex-shrink: 0;
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .item-case-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .case-no-bold {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0ea5e9;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .map-btn {
+      flex-shrink: 0;
+      border: 1px solid var(--sky);
+      background: var(--white);
+      color: var(--sky);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    .map-btn:active {
+      background: var(--sky-light);
     }
 
     .item-addr {
-      font-size: 13px; font-weight: 600; color: var(--text);
-      line-height: 1.4;
-      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 6px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
 
-    .item-prices {
-      display: flex; gap: 12px;
+    .item-area {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    .item-spl {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ea580c;
+      line-height: 1.4;
       margin-bottom: 8px;
     }
 
-    .price-block { flex: 1; }
-    .price-label { font-size: 10px; color: var(--sub); margin-bottom: 2px; }
-    .price-val   { font-size: 14px; font-weight: 700; color: var(--text); }
-    .price-val.highlight { color: var(--gold); }
+    .item-prices {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .price-block {
+      flex: 1;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .price-label { font-size: 11px; color: var(--sub); margin-bottom: 3px; }
+    .price-val   { font-size: 15px; font-weight: 800; color: var(--text); }
+    .price-val.highlight { color: var(--sky); }
 
     .item-bottom {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-top: 8px;
+      padding-top: 10px;
       border-top: 1px solid var(--border);
     }
 
     .bid-time { font-size: 12px; color: var(--sub); }
-    .bid-time strong { color: var(--text); }
+    .bid-time strong { color: var(--text); font-weight: 700; }
 
     .view-more {
-      font-size: 11px; color: var(--sub);
-      display: flex; align-items: center; gap: 3px;
+      font-size: 12px;
+      color: var(--sky);
+      font-weight: 600;
     }
 
-    /* ── 빈 화면 ── */
-    #emptyView {
+    /* ── 상태 화면 공통 ── */
+    .state-panel {
       display: none;
       text-align: center;
-      padding: 60px 24px;
+      padding: 48px 20px;
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-top: 16px;
+    }
+
+    .state-icon { font-size: 44px; margin-bottom: 12px; }
+    .state-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .state-desc {
+      font-size: 14px;
       color: var(--sub);
+      line-height: 1.65;
+      margin-bottom: 20px;
     }
-    #emptyView .empty-icon { font-size: 48px; margin-bottom: 12px; }
-    #emptyView .empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    #emptyView .empty-desc  { font-size: 13px; line-height: 1.6; }
 
-    /* ── 오류 ── */
-    #errorView {
-      display: none;
-      text-align: center;
-      padding: 48px 24px;
-    }
-    #errorView .err-icon  { font-size: 44px; margin-bottom: 12px; }
-    #errorView .err-title { font-size: 16px; font-weight: 700; color: #f87171; margin-bottom: 8px; }
-    #errorView .err-desc  { font-size: 13px; color: var(--sub); line-height: 1.6; margin-bottom: 20px; }
+    #errorView .state-title { color: var(--red); }
+    #noParamView .state-title { color: var(--red); }
 
-    .btn-red {
+    .btn-primary {
       display: inline-block;
-      padding: 12px 24px;
-      background: var(--red);
+      padding: 13px 24px;
+      background: var(--sky);
       color: #fff;
-      font-size: 14px; font-weight: 700;
-      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 12px;
       text-decoration: none;
     }
-
-    /* ── 파라미터 없는 경우 ── */
-    #noParamView {
-      display: none;
-      text-align: center;
-      padding: 60px 24px;
-    }
-    #noParamView .np-icon  { font-size: 48px; margin-bottom: 14px; }
-    #noParamView .np-title { font-size: 18px; font-weight: 800; color: #f87171; margin-bottom: 8px; }
-    #noParamView .np-desc  { font-size: 13px; color: var(--sub); line-height: 1.6; margin-bottom: 24px; }
 
     /* ── 더보기 ── */
     #loadMore {
       display: none;
-      width: calc(100% - 24px);
-      margin: 0 12px 20px;
-      padding: 13px;
-      background: var(--card);
+      width: 100%;
+      margin: 4px 0 20px;
+      padding: 14px;
+      background: var(--white);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       color: var(--sub);
-      font-size: 14px; font-weight: 600;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      text-align: center;
     }
-    #loadMore:hover { border-color: var(--sub); color: var(--text); }
+    #loadMore:active { background: var(--sky-light); color: var(--sky); }
   </style>
 </head>
 <body>
 
-<!-- ★ Worker URL은 config.js 파일에서 관리합니다 ★ -->
 <script src="config.js"></script>
 <script>
-  // config.js가 없거나 로드 실패 시 빈 문자열로 폴백
-  const WORKER_URL = (window.DUIN_CONFIG && window.DUIN_CONFIG.WORKER_URL) || '';
+  window.DUIN_CONFIG = window.DUIN_CONFIG || {};
+  if (!window.DUIN_CONFIG.WORKER_URL) {
+    window.DUIN_CONFIG.WORKER_URL = 'https://polished-meadow-ca23.giyong8312005.workers.dev';
+  }
+  window.DUIN_CONFIG.COUPON = Object.assign({
+    show: true,
+    code: 'DUIN-QR2026',
+    title: '쿠폰 다운받기',
+    desc: '',
+    modalDesc: '',
+    successMsg: '물건을 선택해 주세요.',
+    successTitle: '쿠폰 적용 완료',
+    btnText: '받기 →',
+  }, window.DUIN_CONFIG.COUPON || {});
+  window.DUIN_CONFIG.PAID_SIGNUP = Object.assign({
+    show: true,
+    url: 'https://www.dooinauction.com',
+    linkText: '권리분석·매각명세서가 더 필요하시면 두인경매에서 보기 →',
+  }, window.DUIN_CONFIG.PAID_SIGNUP || {});
+  window.DUIN_CONFIG.COUPON_ACCESS_DAYS = window.DUIN_CONFIG.COUPON_ACCESS_DAYS || 30;
+
+  const WORKER_URL = window.DUIN_CONFIG.WORKER_URL;
+  const COUPON_CFG = window.DUIN_CONFIG.COUPON;
+  const ACCESS_KEY = 'duin_coupon_access';
 </script>
 
-<!-- 상단 바 -->
-<div class="top-bar">
-  <div class="logo-box">두</div>
-  <div class="top-bar-info">
-    <div class="top-bar-name" id="headerName">두인경매</div>
-    <div class="top-bar-date" id="headerDate"></div>
+<!-- 히어로: 법원명 · 날짜 · 쿠폰 -->
+<div id="pageHero">
+  <div class="hero-top">
+    <div class="hero-brand">
+      <a class="hero-logo" href="https://www.dooinauction.com" target="_blank" rel="noopener">
+        <img src="assets/logo.png" alt="두인경매 Dooin AUCTION">
+      </a>
+    </div>
+    <a class="top-bar-link" id="dooinLink"
+       href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
+      사이트 ↗
+    </a>
   </div>
-  <a class="top-bar-link" id="dooinLink"
-     href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
-    두인경매 ↗
-  </a>
-</div>
-
-<!-- 로딩 -->
-<div id="loadingView">
-  <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">경매물건 불러오는 중...</div>
-</div>
-
-<!-- 통계 -->
-<div id="statsBar"></div>
-
-<!-- 목록 -->
-<div id="listView"></div>
-
-<!-- 더보기 -->
-<button id="loadMore" onclick="loadMore()">더 보기</button>
-
-<!-- 빈 화면 -->
-<div id="emptyView">
-  <div class="empty-icon">📋</div>
-  <div class="empty-title">오늘 경매물건이 없습니다</div>
-  <div class="empty-desc" id="emptyDesc"></div>
-</div>
-
-<!-- 오류 -->
-<div id="errorView">
-  <div class="err-icon">⚠️</div>
-  <div class="err-title" id="errTitle">데이터를 불러올 수 없습니다</div>
-  <div class="err-desc" id="errDesc"></div>
-  <a class="btn-red" href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
-    두인경매 직접 방문하기
-  </a>
-</div>
-
-<!-- 파라미터 없음 -->
-<div id="noParamView">
-  <div class="np-icon">⚠️</div>
-  <div class="np-title">QR코드 정보가 없습니다</div>
-  <div class="np-desc">
-    올바른 QR코드를 스캔해 주세요.<br>
-    두인경매 경매일정 페이지로 이동합니다.
+  <div class="hero-court" id="headerName">법원 경매물건</div>
+  <div class="hero-date">
+    <span class="dot"></span>
+    <span id="headerDate"></span>
+    <span>오늘 경매</span>
   </div>
-  <a class="btn-red" href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
-    두인경매 경매일정 보기
-  </a>
+  <div id="couponBanner"></div>
+</div>
+
+<div class="main-content">
+
+  <div id="loadingView">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">경매물건 불러오는 중...</div>
+  </div>
+
+  <div id="statsBar"></div>
+  <div id="listView"></div>
+  <button id="loadMore" onclick="loadMore()">더 보기</button>
+
+  <div id="emptyView" class="state-panel">
+    <div class="state-icon">📋</div>
+    <div class="state-title">오늘 경매물건이 없습니다</div>
+    <div class="state-desc" id="emptyDesc"></div>
+  </div>
+
+  <div id="errorView" class="state-panel">
+    <div class="state-icon">⚠️</div>
+    <div class="state-title" id="errTitle">데이터를 불러올 수 없습니다</div>
+    <div class="state-desc" id="errDesc"></div>
+    <a class="btn-primary" href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
+      두인경매 직접 방문하기
+    </a>
+  </div>
+
+  <div id="noParamView" class="state-panel">
+    <div class="state-icon">⚠️</div>
+    <div class="state-title">QR코드 정보가 없습니다</div>
+    <div class="state-desc">
+      올바른 QR코드를 스캔해 주세요.<br>
+      두인경매 경매일정 페이지로 이동합니다.
+    </div>
+    <a class="btn-primary" href="https://www.dooinauction.com/ca/caDtList.php" target="_blank">
+      두인경매 경매일정 보기
+    </a>
+  </div>
+
+</div>
+
+<!-- 쿠폰 다운로드 모달 -->
+<div class="modal-overlay" id="couponModal">
+  <div class="modal-sheet">
+    <div class="modal-icon">🎁</div>
+    <div class="modal-title" id="modalTitle">쿠폰 다운받기</div>
+    <div class="modal-desc" id="modalDesc" style="display:none"></div>
+
+    <div id="couponFormWrap">
+      <div class="form-error" id="formError"></div>
+      <form id="couponForm">
+        <div class="form-group">
+          <label>휴대폰 번호 <span class="req">*</span></label>
+          <input type="tel" id="inputPhone" placeholder="01012345678" inputmode="numeric" maxlength="13" required>
+        </div>
+        <label class="consent-row">
+          <input type="checkbox" id="inputConsent" required>
+          <span>개인정보(휴대폰) 수집·이용에 동의합니다. 경매 안내 및 서비스 제공 목적으로만 사용됩니다.</span>
+        </label>
+        <button type="submit" class="btn-submit" id="btnSubmit">쿠폰 받기</button>
+      </form>
+    </div>
+
+    <div class="coupon-success" id="couponSuccess">
+      <div class="coupon-success-title" id="successTitle">쿠폰 적용 완료</div>
+      <div class="coupon-success-msg" id="successMsg">물건을 선택해 주세요.</div>
+      <button type="button" class="btn-submit" id="btnCloseModal" style="margin-top:16px">확인</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -330,17 +709,242 @@ document.getElementById('headerDate').textContent = TODAY_LABEL;
 
 const sp = new URLSearchParams(window.location.search);
 const courtCode = sp.get('c');
-const deptCode  = sp.get('d'); /* 구버전 QR 호환용 (없으면 법원 전체) */
+const deptCode  = sp.get('d');
 const nameRaw   = sp.get('n');
+const courtLabel = nameRaw ? decodeURIComponent(nameRaw) : '법원 경매물건';
 
-/* 파라미터 없으면 안내 화면 */
+function setupCouponBanner() {
+  const wrap = document.getElementById('couponBanner');
+  if (!COUPON_CFG.show) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  renderCouponBanner();
+}
+
+function hasCouponAccess() {
+  try {
+    const raw = localStorage.getItem(ACCESS_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data.couponCode || !data.expiresAt) return false;
+    return new Date(data.expiresAt) > new Date();
+  } catch (_) {
+    return false;
+  }
+}
+
+function getCouponAccess() {
+  try {
+    const raw = localStorage.getItem(ACCESS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function saveCouponAccess(access) {
+  localStorage.setItem(ACCESS_KEY, JSON.stringify(access));
+}
+
+function buildLocalCouponAccess(phone, couponCode) {
+  const days = window.DUIN_CONFIG.COUPON_ACCESS_DAYS || 30;
+  const now = Date.now();
+  const normalized = normalizePhoneInput(phone);
+  const masked = normalized.length >= 8
+    ? normalized.slice(0, 3) + '****' + normalized.slice(-4)
+    : normalized;
+  return {
+    couponCode: couponCode,
+    phoneMasked: masked,
+    registeredAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + days * 86400000).toISOString(),
+    localOnly: true,
+  };
+}
+
+function normalizePhoneInput(val) {
+  let d = String(val || '').replace(/[^0-9]/g, '');
+  if (d.startsWith('82') && d.length >= 11) {
+    d = '0' + d.slice(2);
+  }
+  if (d.length === 10 && d.startsWith('10')) {
+    d = '0' + d;
+  }
+  return d;
+}
+
+function isValidKrMobile(phone) {
+  return /^01[016789]\d{7,8}$/.test(phone);
+}
+
+function renderCouponBanner() {
+  const wrap = document.getElementById('couponBanner');
+  const registered = hasCouponAccess();
+
+  if (registered) {
+    wrap.innerHTML =
+      '<div class="coupon-link registered" id="couponBannerDone">' +
+        '<div class="coupon-icon">✓</div>' +
+        '<div class="coupon-text">' +
+          '<div class="coupon-title">' + esc(COUPON_CFG.successTitle || '쿠폰 적용 완료') + '</div>' +
+        '</div>' +
+      '</div>';
+  } else {
+    const descHtml = COUPON_CFG.desc
+      ? '<div class="coupon-desc">' + esc(COUPON_CFG.desc) + '</div>'
+      : '';
+    wrap.innerHTML =
+      '<div class="coupon-link" role="button" tabindex="0" id="couponBannerBtn">' +
+        '<div class="coupon-icon">🎁</div>' +
+        '<div class="coupon-text">' +
+          '<div class="coupon-title">' + esc(COUPON_CFG.title || '쿠폰 다운받기') + '</div>' +
+          descHtml +
+        '</div>' +
+        '<span class="coupon-btn">' + esc(COUPON_CFG.btnText || '받기 →') + '</span>' +
+      '</div>';
+    document.getElementById('couponBannerBtn').addEventListener('click', openCouponModal);
+    document.getElementById('couponBannerBtn').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCouponModal(); }
+    });
+  }
+}
+
+function setModalDesc(text) {
+  const el = document.getElementById('modalDesc');
+  const t = String(text || '').trim();
+  el.textContent = t;
+  el.style.display = t ? 'block' : 'none';
+}
+
+function openCouponModal() {
+  if (hasCouponAccess()) {
+    showCouponSuccess('이미 적용된 쿠폰입니다.');
+    return;
+  }
+  document.getElementById('couponFormWrap').classList.remove('hidden');
+  document.getElementById('couponSuccess').classList.remove('show');
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('couponForm').reset();
+  document.getElementById('modalTitle').textContent = '쿠폰 다운받기';
+  setModalDesc(COUPON_CFG.modalDesc);
+  document.getElementById('couponModal').classList.add('show');
+}
+
+function closeCouponModal() {
+  document.getElementById('couponModal').classList.remove('show');
+  renderCouponBanner();
+}
+
+function showCouponSuccess(msg) {
+  document.getElementById('couponFormWrap').classList.add('hidden');
+  document.getElementById('couponSuccess').classList.add('show');
+  document.getElementById('successTitle').textContent =
+    COUPON_CFG.successTitle || '쿠폰 적용 완료';
+  document.getElementById('successMsg').textContent = msg || (COUPON_CFG.successMsg ||
+    '물건을 선택해 주세요.');
+  document.getElementById('modalTitle').textContent = COUPON_CFG.successTitle || '쿠폰 적용 완료';
+  setModalDesc('');
+  document.getElementById('couponModal').classList.add('show');
+}
+
+document.getElementById('couponForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('formError');
+  const btn   = document.getElementById('btnSubmit');
+  errEl.classList.remove('show');
+
+  const phoneRaw  = document.getElementById('inputPhone').value.trim();
+  const phone     = normalizePhoneInput(phoneRaw);
+  const consent = document.getElementById('inputConsent').checked;
+  const couponCode = COUPON_CFG.code || 'DUIN-QR2026';
+
+  if (!phoneRaw || !consent) {
+    errEl.textContent = '휴대폰 번호와 동의 항목을 확인해 주세요.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  if (!isValidKrMobile(phone)) {
+    errEl.textContent = '올바른 휴대폰 번호를 입력해 주세요. (예: 01012345678)';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '처리 중...';
+
+  try {
+    let apiUrl = WORKER_URL.replace(/\/$/, '') + '/?action=coupon';
+    if (courtCode) {
+      apiUrl += '&c=' + encodeURIComponent(courtCode);
+    }
+    console.log('[쿠폰] 요청 phone=' + phone.slice(0, 3) + '****' + phone.slice(-4));
+    const resp = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'coupon',
+        phone,
+        consent,
+        couponCode,
+        courtCode: courtCode || '',
+        courtName: courtLabel || '',
+      }),
+    });
+    const json = await resp.json();
+    if (!resp.ok || !json.ok) {
+      if (json.error && json.error.indexOf('법원코드') >= 0) {
+        console.warn('[쿠폰] 구버전 Worker — 로컬 쿠폰 발급 (Worker 재배포 필요)');
+        saveCouponAccess(buildLocalCouponAccess(phone, couponCode));
+        showCouponSuccess('물건을 선택해 주세요.\n(Worker 미배포: DB 저장은 재배포 후 가능)');
+        return;
+      }
+      if (json.error && json.error.indexOf('휴대폰') >= 0 && isValidKrMobile(phone)) {
+        console.warn('[쿠폰] Worker 휴대폰 검증 오류 — 로컬 쿠폰 발급:', phone);
+        saveCouponAccess(buildLocalCouponAccess(phone, couponCode));
+        showCouponSuccess('물건을 선택해 주세요.\n(Worker 재배포 후 DB 저장 가능)');
+        return;
+      }
+      throw new Error(json.error || '쿠폰 발급에 실패했습니다.');
+    }
+
+    saveCouponAccess(json.access);
+    const msg = json.isNew === false
+      ? (json.message || '이미 등록된 번호입니다.')
+      : (COUPON_CFG.successMsg || '물건을 선택해 주세요.');
+    showCouponSuccess(msg);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '쿠폰 받기';
+  }
+});
+
+document.getElementById('btnCloseModal').addEventListener('click', closeCouponModal);
+
+document.getElementById('couponModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCouponModal();
+});
+
+function showHero(label) {
+  document.getElementById('headerName').textContent = label;
+  document.getElementById('pageHero').style.display = 'block';
+  setupCouponBanner();
+}
+
 if (!courtCode) {
   console.warn('[두인경매] URL 파라미터 없음. 안내 화면 표시.');
   show('noParamView');
-  hide('loadingView');
 } else {
-  console.log(`[두인경매] 초기화 시작 — 법원코드: ${courtCode}${deptCode ? ', 계코드: ' + deptCode : ' (법원 전체)'}`);
-  init();
+  const label = courtLabel;
+  showHero(label);
+  document.title = label + ' · 오늘의 경매물건';
+  showFlex('loadingView');
+  init(label);
 }
 
 /* ═══════════════════════════════
@@ -350,13 +954,7 @@ let allItems  = [];
 let displayed = 0;
 const PAGE_SIZE = 20;
 
-async function init() {
-  /* 이름 표시 */
-  const label = nameRaw ? decodeURIComponent(nameRaw) : '법원 경매물건';
-  document.getElementById('headerName').textContent = label;
-  document.title = label + ' · 오늘의 경매물건';
-
-  /* Worker URL이 없으면 config.js 설정 안내 */
+async function init(label) {
   if (!WORKER_URL) {
     console.error('[두인경매] WORKER_URL이 비어 있습니다. config.js를 확인해 주세요.');
     hide('loadingView');
@@ -364,14 +962,13 @@ async function init() {
     document.getElementById('errTitle').textContent = 'Worker 설정이 필요합니다';
     document.getElementById('errDesc').innerHTML =
       'Cloudflare Worker를 아직 설정하지 않았습니다.<br>' +
-      '<code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">' +
-      'config.js</code> 파일의 <code style="font-size:11px; background:#0d1b2a; padding:2px 6px; border-radius:4px;">WORKER_URL</code>' +
-      ' 을 입력해 주세요.';
+      '<code style="font-size:11px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">config.js</code>' +
+      ' 파일의 WORKER_URL을 입력해 주세요.';
     return;
   }
 
   document.getElementById('loadingText').textContent =
-    label + ' 물건 불러오는 중... (건수가 많으면 잠시 걸릴 수 있습니다)';
+    '물건 목록 불러오는 중... (잠시만 기다려 주세요)';
 
   try {
     let workerUrl = `${WORKER_URL.replace(/\/$/, '')}/?c=${encodeURIComponent(courtCode)}`;
@@ -379,20 +976,15 @@ async function init() {
     console.log(`[두인경매] Worker 호출: ${workerUrl}`);
 
     const resp = await fetch(workerUrl);
-    console.log(`[두인경매] Worker 응답 상태: ${resp.status}`);
-
     if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
 
     const text = await resp.text();
     const parsed = parseResponse(text);
     const data = parsed.items;
-    const totalCnt = parsed.totalCnt;
-    console.log(`[두인경매] 파싱 결과: ${data ? data.length : 0}건 (totalCnt=${totalCnt ?? '?'})`);
 
     hide('loadingView');
 
     if (!data || data.length === 0) {
-      console.log('[두인경매] 오늘 경매물건 없음.');
       show('emptyView');
       document.getElementById('emptyDesc').textContent =
         label + ' · ' + TODAY_LABEL;
@@ -412,53 +1004,33 @@ async function init() {
   }
 }
 
-/* ═══════════════════════════════
-   응답 파싱 (JSON 대응)
-═══════════════════════════════ */
 function parseResponse(text) {
   const trimmed = text.trim();
   const empty = { items: [], totalCnt: 0 };
 
-  /* JSON 시도 */
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
       const json = JSON.parse(trimmed);
-
-      /* 배열 형태 */
       if (Array.isArray(json)) return { items: json, totalCnt: json.length };
-
       const totalCnt = json.totalCnt != null ? Number(json.totalCnt) : null;
-
-      /* dooinauction.com: { item: [...], totalCnt: N } */
       if (json.item   && Array.isArray(json.item))   return { items: json.item, totalCnt };
       if (json.res    && Array.isArray(json.res))    return { items: json.res, totalCnt };
       if (json.list   && Array.isArray(json.list))   return { items: json.list, totalCnt };
       if (json.data   && Array.isArray(json.data))   return { items: json.data, totalCnt };
       if (json.items  && Array.isArray(json.items))  return { items: json.items, totalCnt };
       if (json.result && Array.isArray(json.result)) return { items: json.result, totalCnt };
-
-      /* 단일 객체 */
       return { items: [json], totalCnt: 1 };
     } catch (_) {}
   }
-
-  /* JSON 파싱 실패 → 빈 배열 (HTML 응답 등) */
   return empty;
 }
 
-/* ═══════════════════════════════
-   통계 바
-═══════════════════════════════ */
 function renderStats(items, label) {
   const bar = document.getElementById('statsBar');
-  bar.innerHTML =
-    '<strong>' + items.length + '건</strong> &nbsp;' + label + ' · ' + TODAY_LABEL;
+  bar.innerHTML = '오늘 <strong>' + items.length + '건</strong>';
   bar.style.display = 'block';
 }
 
-/* ═══════════════════════════════
-   목록 렌더링
-═══════════════════════════════ */
 function renderItems() {
   const container = document.getElementById('listView');
   const end       = Math.min(displayed + PAGE_SIZE, allItems.length);
@@ -467,7 +1039,6 @@ function renderItems() {
     container.appendChild(buildCard(allItems[i], i));
   }
   displayed = end;
-
   show('listView');
 
   const more = document.getElementById('loadMore');
@@ -479,49 +1050,98 @@ function renderItems() {
   }
 }
 
-function loadMore() {
-  renderItems();
+function loadMore() { renderItems(); }
+
+function buildDetailPageUrl(tid) {
+  let url = 'detail.html?tid=' + encodeURIComponent(tid) +
+    '&c=' + encodeURIComponent(courtCode) +
+    '&n=' + encodeURIComponent(courtLabel);
+  if (deptCode) url += '&d=' + encodeURIComponent(deptCode);
+  return url;
 }
 
-/* ═══════════════════════════════
-   카드 생성
-═══════════════════════════════ */
-function buildCard(item, idx) {
-  /* 필드 추출 - dooinauction.com 실제 응답 키 */
-  const caseNo  = (item.saNo   || '').replace(/<[^>]*>/g, '').trim();
+function cacheItemForDetail(item) {
+  const tid = item.tid;
+  if (!tid) return;
+  const key = 'duin_item_' + tid;
+  const raw = JSON.stringify(item);
+  try {
+    sessionStorage.setItem(key, raw);
+    localStorage.setItem(key, raw);
+  } catch (_) {}
+}
+
+function buildCard(item) {
+  const caseNo  = stripHtml(item.saNo);
   const type    = item.ctgr    || '';
-  const addr    = item.adrsInfo|| item.regnAdrs || '주소 정보 없음';
+  const addr    = stripHtml(item.adrsInfo || item.regnAdrs) || '주소 정보 없음';
+  const area    = stripHtml(item.areaInfo);
+  const spl     = (item.splCdtn || '').trim();
   const apslAmt = num(item.apslAmt);
   const minbAmt = num(item.minbAmt);
   const bidDt   = item.bidDt   || '';
   const bidTm   = item.bidTm   || '';
-  const stat    = (item.statNm || '').replace(/<[^>]*>/g, '').trim();
+  const stat    = stripHtml(item.statNm);
   const tid     = item.tid     || '';
+  const mapAddr = stripHtml(item.regnAdrs || item.adrsInfo);
+  const imgUrl  = imgFullUrl(item);
 
-  /* 두인경매 상세 페이지 링크 */
   const detailLink = tid
-    ? `https://www.dooinauction.com/ca/caDtView.php?tid=${tid}`
-    : buildDetailLink(caseNo, '', '', item);
+    ? buildDetailPageUrl(tid)
+    : 'https://www.dooinauction.com/ca/caDtList.php';
 
-  /* 상태 배지 색 */
   let statClass = 'status-기타';
   if (stat.includes('진행') || stat.includes('신건')) statClass = 'status-진행';
-  else if (stat.includes('낙찰') || stat.includes('매각'))     statClass = 'status-낙찰';
-  else if (stat.includes('변경') || stat.includes('연기'))     statClass = 'status-변경';
+  else if (stat.includes('낙찰') || stat.includes('매각')) statClass = 'status-낙찰';
+  else if (stat.includes('변경') || stat.includes('연기')) statClass = 'status-변경';
 
   const a = document.createElement('a');
   a.className = 'auction-item';
   a.href      = detailLink;
-  a.target    = '_blank';
-  a.rel       = 'noopener';
+  if (tid) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      cacheItemForDetail(item);
+      window.location.href = buildDetailPageUrl(tid);
+    });
+  }
 
-  a.innerHTML = `
-    <div class="item-top">
-      ${type ? `<span class="type-badge">${esc(type)}</span>` : ''}
-      ${stat ? `<span class="status-badge ${statClass}">${esc(stat)}</span>` : ''}
-      ${caseNo ? `<span class="case-no">${esc(caseNo)}</span>` : ''}
-    </div>
+  const thumbWrap = document.createElement('div');
+  thumbWrap.className = 'item-thumb-wrap';
+  if (imgUrl) {
+    const img = document.createElement('img');
+    img.className = 'item-thumb';
+    img.src = imgUrl;
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.alt = '';
+    img.onerror = function() {
+      const ph = document.createElement('div');
+      ph.className = 'item-thumb-placeholder';
+      ph.textContent = '🏠';
+      this.replaceWith(ph);
+    };
+    thumbWrap.appendChild(img);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'item-thumb-placeholder';
+    ph.textContent = '🏠';
+    thumbWrap.appendChild(ph);
+  }
+
+  const body = document.createElement('div');
+  body.className = 'item-body';
+  body.innerHTML = `
+    ${type || stat ? `<div class="item-top">${stat ? `<span class="status-badge ${statClass}">${esc(stat)}</span>` : ''}</div>` : ''}
+    ${type ? `<div class="item-type">${esc(type)}</div>` : ''}
+    ${caseNo || mapAddr ? `
+    <div class="item-case-row">
+      ${caseNo ? `<span class="case-no-bold">${esc(caseNo)}</span>` : ''}
+      ${mapAddr ? `<button type="button" class="map-btn">지도 보기</button>` : ''}
+    </div>` : ''}
     <div class="item-addr">${esc(addr)}</div>
+    ${area ? `<div class="item-area">${esc(area)}</div>` : ''}
+    ${spl ? `<div class="item-spl">${esc(spl)}</div>` : ''}
     <div class="item-prices">
       <div class="price-block">
         <div class="price-label">감정가</div>
@@ -533,43 +1153,57 @@ function buildCard(item, idx) {
       </div>
     </div>
     <div class="item-bottom">
-      <div class="bid-time">입찰: <strong>${esc(bidDt)} ${esc(bidTm)}</strong></div>
+      <div class="bid-time">입찰 <strong>${esc(bidDt)} ${esc(bidTm)}</strong></div>
       <div class="view-more">상세보기 →</div>
     </div>`;
+
+  const mapBtn = body.querySelector('.map-btn');
+  if (mapBtn && mapAddr) {
+    mapBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openKakaoMap(mapAddr);
+    });
+  }
+
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.appendChild(thumbWrap);
+  row.appendChild(body);
+  a.appendChild(row);
 
   return a;
 }
 
-/* ═══════════════════════════════
-   상세 링크 생성
-═══════════════════════════════ */
-function buildDetailLink(caseNo, caseYear, caseSeq, item) {
-  /* 사건번호 형식: "2024타경3887" → year=2024, seq=3887 */
-  if (caseYear && caseSeq) {
-    return `https://www.dooinauction.com/ca/caDtView.php?caseYear=${caseYear}&caseSeq=${caseSeq}`;
+function openKakaoMap(address) {
+  if (!address) return;
+  const url = 'https://map.daum.net/?q=' + encodeURIComponent(address);
+  const h = Math.max(600, (screen.availHeight || 800) - 50);
+  const win = window.open(
+    url,
+    'KakaoMap',
+    'width=1200,height=' + h + ',top=0,left=10,scrollbars=yes,resizable=yes'
+  );
+  if (!win) {
+    window.open(url, '_blank', 'noopener');
   }
-
-  /* caseNo에서 연도/번호 추출 시도 */
-  if (caseNo) {
-    const m = String(caseNo).match(/(\d{4})[^\d]*(\d+)/);
-    if (m) {
-      return `https://www.dooinauction.com/ca/caDtView.php?caseYear=${m[1]}&caseSeq=${m[2]}`;
-    }
-  }
-
-  /* fallback: 검색 페이지 */
-  return 'https://www.dooinauction.com/ca/caDtList.php';
 }
 
-/* ═══════════════════════════════
-   유틸
-═══════════════════════════════ */
-function v(obj, keys) {
-  for (const k of keys) {
-    if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
-  }
-  return null;
+function imgFullUrl(item) {
+  const raw = (item.imgUrl || '').trim();
+  if (!raw) return '';
+  if (raw.startsWith('http')) return raw;
+  return 'https://www.dooinauction.com' + raw;
 }
+
+function stripHtml(s) {
+  return String(s || '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 
 function num(val) {
   if (val === null || val === undefined) return 0;
@@ -587,8 +1221,6 @@ function fmtAmt(n) {
   return n.toLocaleString() + '원';
 }
 
-/* 금액 문자열 → 숫자 ("142,000,000" → 142000000) */
-
 function esc(s) {
   return String(s || '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -597,6 +1229,7 @@ function esc(s) {
 
 function show(id) { document.getElementById(id).style.display = 'block'; }
 function hide(id) { document.getElementById(id).style.display = 'none'; }
+function showFlex(id) { document.getElementById(id).style.display = 'flex'; }
 </script>
 </body>
 </html>
