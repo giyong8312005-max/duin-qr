@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <title>경매물건 상세 · 두인경매</title>
+  <style>
+    :root {
+      --sky:       #0ea5e9;
+      --sky-light: #e0f2fe;
+      --sky-soft:  #f0f9ff;
+      --white:     #ffffff;
+      --text:      #0f172a;
+      --sub:       #64748b;
+      --border:    #e2e8f0;
+      --radius:    14px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+                   'Noto Sans KR', '맑은 고딕', sans-serif;
+      background: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .back-link {
+      font-size: 14px;
+      color: var(--sky);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .top-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sub);
+    }
+
+    .main-content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px 16px 32px;
+    }
+
+    .detail-hero {
+      margin-bottom: 16px;
+    }
+
+    .case-no-large {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--sky);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .status-진행 { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
+    .status-낙찰 { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; }
+    .status-변경 { background: #fffbeb; border: 1px solid #fde68a; color: #d97706; }
+    .status-기타 { background: #f8fafc; border: 1px solid var(--border); color: var(--sub); }
+
+    .item-type {
+      font-size: 14px;
+      color: var(--sub);
+      margin-bottom: 6px;
+    }
+
+    .bid-banner {
+      background: var(--sky-soft);
+      border: 1px solid #bae6fd;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .bid-banner strong { color: var(--sky); }
+
+    .detail-image {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .img-placeholder {
+      width: 100%;
+      height: 200px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-row {
+      display: flex;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label {
+      flex-shrink: 0;
+      width: 88px;
+      color: var(--sub);
+      font-size: 13px;
+    }
+    .info-value {
+      flex: 1;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .price-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .price-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .price-box .label { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
+    .price-box .val { font-size: 17px; font-weight: 800; }
+    .price-box .val.highlight { color: var(--sky); }
+
+    .spl-highlight {
+      color: #ea580c;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .map-btn {
+      display: inline-block;
+      margin-top: 10px;
+      border: 1px solid var(--sky);
+      background: var(--white);
+      color: var(--sky);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .free-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 999px;
+      padding: 5px 12px;
+      margin-bottom: 10px;
+    }
+
+    .external-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .link-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 11px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .link-btn.primary {
+      border-color: var(--sky);
+      color: var(--sky);
+      background: var(--sky-soft);
+    }
+
+    .detail-footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .footer-paid-link {
+      font-size: 12px;
+      color: var(--sub);
+      text-decoration: none;
+    }
+    .footer-paid-link:hover { color: var(--sky); }
+
+    .state-panel {
+      text-align: center;
+      padding: 48px 20px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--sky);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 쿠폰 미등록 안내 ── */
+    .coupon-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.92);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .coupon-gate.show { display: flex; }
+
+    .coupon-gate-box {
+      max-width: 360px;
+      text-align: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: 0 8px 30px rgba(15,23,42,0.08);
+    }
+    .coupon-gate-box h2 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .coupon-gate-box p {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+    .coupon-gate-box a {
+      display: inline-block;
+      background: var(--sky);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      text-decoration: none;
+    }
+
+    .detail-blur {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+<script src="config.js"></script>
+<script>
+  window.DUIN_CONFIG = window.DUIN_CONFIG || {};
+  if (!window.DUIN_CONFIG.WORKER_URL) {
+    window.DUIN_CONFIG.WORKER_URL = 'https://polished-meadow-ca23.giyong8312005.workers.dev';
+  }
+  window.DUIN_CONFIG.COUPON = Object.assign({
+    show: true,
+    code: 'DUIN-QR2026',
+    title: '쿠폰 다운받기',
+    desc: '오늘 경매 핵심 정보 무료 확인',
+    btnText: '받기 →',
+  }, window.DUIN_CONFIG.COUPON || {});
+  window.DUIN_CONFIG.PAID_SIGNUP = Object.assign({
+    show: true,
+    url: 'https://www.dooinauction.com',
+    linkText: '권리분석·매각명세서가 더 필요하시면 두인경매에서 보기 →',
+  }, window.DUIN_CONFIG.PAID_SIGNUP || {});
+  window.DUIN_CONFIG.COUPON_ACCESS_DAYS = window.DUIN_CONFIG.COUPON_ACCESS_DAYS || 30;
+</script>
+
+<div class="top-bar">
+  <a class="back-link" id="backLink" href="index.html">← 목록</a>
+  <span class="top-title">경매물건 상세</span>
+  <span style="width:48px"></span>
+</div>
+
+<div class="main-content">
+  <div id="loadingView" class="state-panel">
+    <div class="spinner"></div>
+    <div id="loadingText">상세정보 불러오는 중...</div>
+  </div>
+  <div id="errorView" class="state-panel" style="display:none">
+    <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+    <div id="errMsg" style="font-weight:700;margin-bottom:8px"></div>
+    <a class="back-link" href="index.html">목록으로 돌아가기</a>
+  </div>
+  <div id="detailWrap" style="display:none"></div>
+</div>
+
+<!-- 쿠폰 미등록 안내 -->
+<div class="coupon-gate" id="couponGate">
+  <div class="coupon-gate-box">
+    <div style="font-size:40px;margin-bottom:12px">🎁</div>
+    <h2>쿠폰 받기</h2>
+    <p>목록 상단 <strong>쿠폰 다운받기</strong>를 먼저 진행해 주세요.</p>
+    <a id="gateBackLink" href="index.html">목록으로 돌아가기</a>
+  </div>
+</div>
+
+<script>
+const ACCESS_KEY  = 'duin_coupon_access';
+const ACCESS_DAYS = window.DUIN_CONFIG.COUPON_ACCESS_DAYS || 30;
+const WORKER_URL  = window.DUIN_CONFIG.WORKER_URL;
+const PAID_CFG    = window.DUIN_CONFIG.PAID_SIGNUP;
+
+const sp = new URLSearchParams(window.location.search);
+const tid       = sp.get('tid');
+const courtCode = sp.get('c');
+const courtName = sp.get('n') ? decodeURIComponent(sp.get('n')) : '';
+const deptCode  = sp.get('d');
+
+let pendingItem = null;
+
+/* ── 뒤로가기 URL에 법원 파라미터 유지 ── */
+(function setupBackLink() {
+  const back = document.getElementById('backLink');
+  let href = 'index.html';
+  if (courtCode) {
+    href += '?c=' + encodeURIComponent(courtCode);
+    if (deptCode) href += '&d=' + encodeURIComponent(deptCode);
+    if (courtName) href += '&n=' + encodeURIComponent(courtName);
+  }
+  back.href = href;
+})();
+
+if (!tid || !courtCode) {
+  showError('물건 정보가 없습니다. 목록에서 다시 선택해 주세요.');
+} else {
+  init();
+}
+
+async function init() {
+  console.log('[상세] tid=' + tid + ' c=' + courtCode);
+
+  if (!WORKER_URL) {
+    showError('Worker URL이 설정되지 않았습니다. config.js를 확인해 주세요.');
+    return;
+  }
+
+  try {
+    const cached = loadCachedItem(tid);
+    if (cached) {
+      console.log('[상세] 캐시 사용');
+      showDetailContent(cached);
+      return;
+    }
+
+    document.getElementById('loadingText').textContent =
+      '상세정보 불러오는 중...';
+
+    pendingItem = await fetchDetailWithFallback();
+    saveCachedItem(pendingItem);
+    showDetailContent(pendingItem);
+  } catch (err) {
+    console.error('[상세] 로드 실패:', err.message);
+    showError(err.message || '상세정보를 불러올 수 없습니다.');
+  }
+}
+
+function showDetailContent(item) {
+  if (!item || (!item.tid && !item.saNo)) {
+    showError('물건 데이터가 없습니다. 목록에서 다시 선택해 주세요.');
+    return;
+  }
+
+  hide('loadingView');
+  document.getElementById('couponGate').classList.remove('show');
+  document.getElementById('detailWrap').classList.remove('detail-blur');
+
+  try {
+    renderDetail(item);
+    show('detailWrap');
+  } catch (err) {
+    console.error('[상세] 렌더 오류:', err.message);
+    showError('화면을 표시할 수 없습니다. 목록에서 다시 선택해 주세요.');
+    return;
+  }
+
+  if (!hasCouponAccess()) {
+    document.getElementById('detailWrap').classList.add('detail-blur');
+    document.getElementById('couponGate').classList.add('show');
+  }
+}
+
+function loadCachedItem(tidKey) {
+  const key = 'duin_item_' + tidKey;
+  for (const store of [sessionStorage, localStorage]) {
+    try {
+      const raw = store.getItem(key);
+      if (!raw) continue;
+      const item = JSON.parse(raw);
+      if (item && (item.tid || item.saNo)) return item;
+    } catch (_) {}
+  }
+  return null;
+}
+
+function saveCachedItem(item) {
+  if (!item || !item.tid) return;
+  const key = 'duin_item_' + item.tid;
+  const raw = JSON.stringify(item);
+  try {
+    sessionStorage.setItem(key, raw);
+    localStorage.setItem(key, raw);
+  } catch (_) {}
+}
+
+async function fetchDetailWithFallback() {
+  try {
+    return await fetchDetailFromWorker(12000);
+  } catch (err) {
+    console.warn('[상세] detail API 실패, 목록 1페이지 폴백:', err.message);
+    document.getElementById('loadingText').textContent =
+      '다시 불러오는 중...';
+    return await fetchItemFromListFirstPage(12000);
+  }
+}
+
+async function fetchItemFromListFirstPage(timeoutMs) {
+  let url = WORKER_URL.replace(/\/$/, '') + '/?c=' + encodeURIComponent(courtCode);
+  if (deptCode) url += '&d=' + encodeURIComponent(deptCode);
+
+  const controller = new AbortController();
+  const timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+
+  let resp;
+  try {
+    resp = await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('상세정보 로드 시간이 초과되었습니다. 목록에서 물건을 다시 선택해 주세요.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  const json = await resp.json();
+  if (!resp.ok) throw new Error(json.error || '목록 조회 실패');
+
+  const list = Array.isArray(json.item) ? json.item : [];
+  const found = list.find(function(it) { return String(it.tid) === String(tid); });
+  if (found) return found;
+
+  throw new Error('해당 물건을 찾을 수 없습니다. 목록에서 다시 선택해 주세요.');
+}
+
+async function fetchDetailFromWorker(timeoutMs) {
+  timeoutMs = timeoutMs || 12000;
+  let url = WORKER_URL.replace(/\/$/, '') + '/?action=detail&tid=' +
+    encodeURIComponent(tid) + '&c=' + encodeURIComponent(courtCode);
+  if (deptCode) url += '&d=' + encodeURIComponent(deptCode);
+
+  console.log('[상세] Worker 호출:', url);
+
+  const controller = new AbortController();
+  const timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+
+  let resp;
+  try {
+    resp = await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('상세정보 로드 시간이 초과되었습니다. 목록에서 물건을 다시 선택해 주세요.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  let json;
+  try {
+    json = await resp.json();
+  } catch (_) {
+    throw new Error('서버 응답을 읽을 수 없습니다. Worker 재배포 여부를 확인해 주세요.');
+  }
+  if (!resp.ok) throw new Error(json.error || '상세 조회 실패');
+
+  if (json.item && !Array.isArray(json.item) && (json.item.tid || json.item.saNo)) {
+    return json.item;
+  }
+  const list = Array.isArray(json.item) ? json.item : [];
+  const found = list.find(function(it) { return String(it.tid) === String(tid); });
+  if (found) return found;
+
+  throw new Error('해당 물건을 찾을 수 없습니다. 목록에서 다시 선택해 주세요.');
+}
+
+/* ── 쿠폰 접근 제어 (index.html과 동일 키) ── */
+function hasCouponAccess() {
+  try {
+    const raw = localStorage.getItem(ACCESS_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data.couponCode || !data.expiresAt) return false;
+    return new Date(data.expiresAt) > new Date();
+  } catch (_) {
+    return false;
+  }
+}
+
+(function setupGateBackLink() {
+  const gate = document.getElementById('gateBackLink');
+  if (!gate) return;
+  let href = 'index.html';
+  if (courtCode) {
+    href += '?c=' + encodeURIComponent(courtCode);
+    if (deptCode) href += '&d=' + encodeURIComponent(deptCode);
+    if (courtName) href += '&n=' + encodeURIComponent(courtName);
+  }
+  gate.href = href;
+})();
+
+/* ── 상세 렌더링 ── */
+function renderDetail(item) {
+  const caseNo  = stripHtml(item.saNo);
+  const type    = item.ctgr || '';
+  const addr    = stripHtml(item.adrsInfo || item.regnAdrs) || '-';
+  const regn    = stripHtml(item.regnAdrs);
+  const area    = stripHtml(item.areaInfo);
+  const spl     = (item.splCdtn || '').trim();
+  const dpsl    = stripHtml(item.dpsl);
+  const crtDpt  = stripHtml(item.crtDpt);
+  const stat    = stripHtml(item.statNm);
+  const bidDt   = item.bidDt || '';
+  const bidTm   = item.bidTm || '';
+  const apslAmt = num(item.apslAmt);
+  const minbAmt = num(item.minbAmt);
+  const sucbAmt = num(item.sucbAmt);
+  const minbPct = item.minbPct || '';
+  const sucbPct = stripHtml(item.sucbPct);
+  const imgUrl  = imgFullUrl(item);
+  const hit     = num(item.hit);
+  const paCnt   = num(item.paCntAll);
+  const imptCh  = stripHtml(item.imptCh);
+  const dDay    = stripHtml(item.dDay);
+  const auctType = stripHtml(item.auctType);
+  const courtUrl = buildCourtAuctionUrl(caseNo, crtDpt, courtName);
+  const showPaidLink = PAID_CFG.show !== false && PAID_CFG.url;
+
+  let statClass = 'status-기타';
+  if (stat.includes('진행') || stat.includes('신건')) statClass = 'status-진행';
+  else if (stat.includes('낙찰') || stat.includes('매각')) statClass = 'status-낙찰';
+  else if (stat.includes('변경') || stat.includes('연기')) statClass = 'status-변경';
+
+  document.title = (caseNo || '경매물건') + ' · 두인경매';
+
+  const wrap = document.getElementById('detailWrap');
+  wrap.innerHTML =
+    '<div class="detail-hero">' +
+      (stat ? '<span class="status-badge ' + statClass + '">' + esc(stat) + '</span>' : '') +
+      (caseNo ? '<div class="case-no-large">' + esc(caseNo) + '</div>' : '') +
+      (type ? '<div class="item-type">' + esc(type) + '</div>' : '') +
+      (bidDt ? '<div class="bid-banner">입찰일시 <strong>' + esc(bidDt) + ' ' + esc(bidTm) + '</strong>' +
+        (dDay ? ' · ' + esc(dDay) : '') + '</div>' : '') +
+    '</div>' +
+    (imgUrl
+      ? '<img class="detail-image" src="' + esc(imgUrl) + '" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'img-placeholder\',textContent:\'🏠\'}))">'
+      : '<div class="img-placeholder">🏠</div>') +
+    '<div class="section">' +
+      '<div class="section-title">기본 정보</div>' +
+      infoRow('소재지', addr) +
+      (regn && regn !== addr ? infoRow('지번', regn) : '') +
+      (crtDpt ? infoRow('담당계', crtDpt) : '') +
+      (dpsl ? infoRow('매각방식', dpsl) : '') +
+      (auctType ? infoRow('경매유형', auctType) : '') +
+      (area ? infoRow('면적', area) : '') +
+      (paCnt > 1 ? infoRow('물건수', paCnt + '건') : '') +
+      (hit ? infoRow('조회수', hit.toLocaleString() + '회') : '') +
+      (imptCh ? infoRow('중요변경', imptCh) : '') +
+      (spl ? '<div class="info-row"><div class="info-label">특이사항</div><div class="info-value spl-highlight">' + esc(spl) + '</div></div>' : '') +
+      '<div class="external-links">' +
+        (regn ? '<button type="button" class="link-btn" id="mapBtn">카카오맵에서 위치 보기</button>' : '') +
+        (courtUrl ? '<a class="link-btn primary" id="courtBtn" href="' + esc(courtUrl) + '" target="_blank" rel="noopener">대법원 경매정보에서 사건 보기</a>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="section">' +
+      '<div class="section-title">가격 정보</div>' +
+      '<div class="price-grid">' +
+        '<div class="price-box"><div class="label">감정가</div><div class="val">' + fmtAmt(apslAmt) + '</div></div>' +
+        '<div class="price-box"><div class="label">최저입찰가</div><div class="val highlight">' + fmtAmt(minbAmt) + '</div></div>' +
+        (sucbAmt ? '<div class="price-box"><div class="label">낙찰가</div><div class="val">' + fmtAmt(sucbAmt) + '</div></div>' : '') +
+        (minbPct ? '<div class="price-box"><div class="label">최저가율</div><div class="val">' + esc(minbPct) + '%</div></div>' : '') +
+        (sucbPct && sucbPct !== '*' ? '<div class="price-box"><div class="label">낙찰가율</div><div class="val">' + esc(sucbPct) + '%</div></div>' : '') +
+      '</div>' +
+    '</div>' +
+    (showPaidLink
+      ? '<div class="detail-footer"><a class="footer-paid-link" href="' + esc(PAID_CFG.url) +
+        '" target="_blank" rel="noopener">' + esc(PAID_CFG.linkText || '두인경매에서 더 보기 →') + '</a></div>'
+      : '');
+
+  const mapBtn = document.getElementById('mapBtn');
+  if (mapBtn && regn) {
+    mapBtn.addEventListener('click', function() {
+      openKakaoMap(regn);
+    });
+  }
+}
+
+function buildCourtAuctionUrl(saNo, crtDpt, courtLabel) {
+  const m = String(saNo || '').match(/(\d{4})-(\d+)/);
+  if (!m) return 'https://www.courtauction.go.kr/pgj/index.on';
+
+  const saFormatted = m[1] + '타경' + m[2];
+  const dpt = String(crtDpt || '');
+  const courtMap = [
+    ['서울중앙', '서울중앙지방법원'], ['서울동부', '서울동부지방법원'],
+    ['서울서부', '서울서부지방법원'], ['서울남부', '서울남부지방법원'],
+    ['서울북부', '서울북부지방법원'], ['의정부', '의정부지방법원'],
+    ['인천', '인천지방법원'], ['수원', '수원지방법원'],
+    ['춘천', '춘천지방법원'], ['청주', '청주지방법원'],
+    ['대전', '대전지방법원'], ['대구', '대구지방법원'],
+    ['부산', '부산지방법원'], ['울산', '울산지방법원'],
+    ['창원', '창원지방법원'], ['광주', '광주지방법원'],
+    ['전주', '전주지방법원'], ['제주', '제주지방법원'],
+  ];
+
+  let court = '';
+  for (let i = 0; i < courtMap.length; i++) {
+    if (dpt.indexOf(courtMap[i][0]) >= 0) {
+      court = courtMap[i][1];
+      break;
+    }
+  }
+
+  if (!court && courtLabel) {
+    const label = String(courtLabel).replace(/\s+/g, '');
+    court = label.indexOf('법원') >= 0 ? label : label + '지방법원';
+  }
+
+  if (!court) return 'https://www.courtauction.go.kr/pgj/index.on';
+
+  return 'https://www.courtauction.go.kr/RetrieveRealEstDetailInqSaList.laf?jiwonNm=' +
+    encodeURIComponent(court) + '&saNo=' + encodeURIComponent(saFormatted);
+}
+
+function infoRow(label, value) {
+  return '<div class="info-row"><div class="info-label">' + esc(label) +
+    '</div><div class="info-value">' + esc(value) + '</div></div>';
+}
+
+function openKakaoMap(address) {
+  const url = 'https://map.daum.net/?q=' + encodeURIComponent(address);
+  const h = Math.max(600, (screen.availHeight || 800) - 50);
+  const win = window.open(url, 'KakaoMap',
+    'width=1200,height=' + h + ',top=0,left=10,scrollbars=yes,resizable=yes');
+  if (!win) window.open(url, '_blank', 'noopener');
+}
+
+function imgFullUrl(item) {
+  const raw = (item.imgUrl || '').trim();
+  if (!raw) return '';
+  if (raw.startsWith('http')) return raw;
+  return 'https://www.dooinauction.com' + raw;
+}
+
+function stripHtml(s) {
+  return String(s || '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function num(val) {
+  if (val === null || val === undefined) return 0;
+  return Number(String(val).replace(/[^0-9]/g, '')) || 0;
+}
+
+function fmtAmt(n) {
+  if (!n || n === 0) return '-';
+  if (n >= 100000000) {
+    const eok = Math.floor(n / 100000000);
+    const man = Math.floor((n % 100000000) / 10000);
+    return man ? eok + '억 ' + man.toLocaleString() + '만' : eok + '억';
+  }
+  if (n >= 10000) return Math.floor(n / 10000).toLocaleString() + '만';
+  return n.toLocaleString() + '원';
+}
+
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+function showError(msg) {
+  hide('loadingView');
+  hide('detailWrap');
+  show('errorView');
+  document.getElementById('errMsg').textContent = msg;
+}
+</script>
+</body>
+</html>
