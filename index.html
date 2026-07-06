@@ -330,16 +330,16 @@ document.getElementById('headerDate').textContent = TODAY_LABEL;
 
 const sp = new URLSearchParams(window.location.search);
 const courtCode = sp.get('c');
-const deptCode  = sp.get('d');
+const deptCode  = sp.get('d'); /* 구버전 QR 호환용 (없으면 법원 전체) */
 const nameRaw   = sp.get('n');
 
 /* 파라미터 없으면 안내 화면 */
-if (!courtCode || !deptCode) {
+if (!courtCode) {
   console.warn('[두인경매] URL 파라미터 없음. 안내 화면 표시.');
   show('noParamView');
   hide('loadingView');
 } else {
-  console.log(`[두인경매] 초기화 시작 — 법원코드: ${courtCode}, 계코드: ${deptCode}`);
+  console.log(`[두인경매] 초기화 시작 — 법원코드: ${courtCode}${deptCode ? ', 계코드: ' + deptCode : ' (법원 전체)'}`);
   init();
 }
 
@@ -374,7 +374,8 @@ async function init() {
     label + ' 물건 불러오는 중... (건수가 많으면 잠시 걸릴 수 있습니다)';
 
   try {
-    const workerUrl = `${WORKER_URL.replace(/\/$/, '')}/?c=${encodeURIComponent(courtCode)}&d=${encodeURIComponent(deptCode)}`;
+    let workerUrl = `${WORKER_URL.replace(/\/$/, '')}/?c=${encodeURIComponent(courtCode)}`;
+    if (deptCode) workerUrl += `&d=${encodeURIComponent(deptCode)}`;
     console.log(`[두인경매] Worker 호출: ${workerUrl}`);
 
     const resp = await fetch(workerUrl);
