@@ -24,4 +24,7 @@ window.DUIN_CONFIG = {
     url: 'https://www.dooinauction.com',
     linkText: '권리분석·매각명세서가 더 필요하시면 두인경매에서 보기 →',
   },
+
+  /** 개인정보 처리 안내 페이지 (GitHub Pages 기준) */
+  PRIVACY_URL: 'privacy.html',
 };
